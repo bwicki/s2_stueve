@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0064)file:///C:/Users/wpabalwic/Downloads/Stueve_Diagramm_Tool_4.html -->
+<!-- saved from url=(0064)file:///C:/Users/wpabalwic/Downloads/Stueve_Diagramm_Tool_5.html -->
 <html lang="en" data-theme="light"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -105,12 +105,26 @@
   }
 
   @media print{
-    body{background:#fff;}
-    .controls, #shareBar, #tooltip, .file-btn{display:none !important;}
-    .chart-card{border:none;box-shadow:none;}
+    @page{ size: A4 portrait; margin: 8mm; }
+    html,body{background:#fff;}
+    .controls, #shareBar, #tooltip, .file-btn, #removeCompareBtn{display:none !important;}
     .app{max-width:none;padding:0;}
-    header{border-bottom:1px solid #999;}
-    footer{color:#444;}
+    header{border-bottom:1px solid #999;padding-bottom:6px;margin-bottom:8px;gap:6px;}
+    .title-block h1{font-size:15px;}
+    .title-block .eyebrow{font-size:8px;margin-bottom:2px;}
+    .title-block p{font-size:9px;margin-top:2px;}
+    #launchLoc{font-size:9px !important;}
+    .stat-strip{margin-bottom:6px;border-radius:4px;}
+    .stat{padding:4px 6px;}
+    .stat .k{font-size:7px;}
+    .stat .v{font-size:11px;margin-top:1px;}
+    .chart-card{border:none;box-shadow:none;padding:6px 6px 4px;border-radius:4px;
+      border:1px solid #ccc;page-break-inside:avoid;}
+    #hodoCard{margin-top:6px !important;padding:6px !important;}
+    #hodoCard > div{font-size:8px;margin-bottom:4px !important;}
+    .legend{gap:8px;padding:6px 2px 2px;font-size:8px;}
+    .swatch{width:12px;}
+    footer{display:none;}
   }
 </style>
 </head>
@@ -158,15 +172,15 @@
 
   <div class="chart-card">
     <div class="chart-wrap">
-      <canvas id="chart" width="1322" height="760" style="height: 760px;"></canvas>
-      <div id="tooltip" style="display: none; left: 420.5px; top: 4px;">
-    <div class="hdr">2026-07-18 08:17:20 UTC</div>
-    <div class="row"><span class="lbl">Altitude</span><span>2859 m</span></div>
-    <div class="row"><span class="lbl">Pressure</span><span>732.5 hPa</span></div>
-    <div class="row"><span class="lbl">Temp</span><span>6.4 °C</span></div>
-    <div class="row"><span class="lbl">Dew point</span><span>2.3 °C</span></div>
-    <div class="row"><span class="lbl">RH</span><span>75 %</span></div>
-    <div class="row"><span class="lbl">Wind</span><span>25 kt / 259°</span></div>
+      <canvas id="chart" width="2644" height="1520" style="height: 760px;"></canvas>
+      <div id="tooltip" style="display: none; left: 1132px; top: 4px;">
+    <div class="hdr">2026-07-18 08:11:24 UTC</div>
+    <div class="row"><span class="lbl">Altitude</span><span>1906 m</span></div>
+    <div class="row"><span class="lbl">Pressure</span><span>817.0 hPa</span></div>
+    <div class="row"><span class="lbl">Temp</span><span>12.5 °C</span></div>
+    <div class="row"><span class="lbl">Dew point</span><span>9.2 °C</span></div>
+    <div class="row"><span class="lbl">RH</span><span>81 %</span></div>
+    <div class="row"><span class="lbl">Wind</span><span>13 kt / 269°</span></div>
   </div>
     </div>
     <div class="legend" id="legend"><div class="item"><span class="swatch " style="border-top-color:var(--temp)"></span>Temperature</div><div class="item"><span class="swatch " style="border-top-color:var(--dew)"></span>Dew point</div><div class="item"><span class="swatch " style="border-top-color:var(--grid-isobar)"></span>Isobars (pressure)</div><div class="item"><span class="swatch dot" style="border-top-color:var(--grid-isotherm)"></span>Isotherms</div><div class="item"><span class="swatch dash" style="border-top-color:var(--grid-adiabat)"></span>Dry adiabats</div><div class="item"><span class="swatch dash" style="border-top-color:var(--grid-moist)"></span>Moist adiabats</div><div class="item"><span class="swatch " style="border-top-color:var(--wind-line)"></span>Wind speed (kt)</div><div class="item"><span class="swatch " style="border-top-color:var(--text-dim)"></span>Inversion (temp. increases with height)</div><div class="item"><span class="swatch dash" style="border-top-color:var(--amber)"></span>Parcel path (LCL → moist adiabat)</div><div class="item">🎌 Wind barb: pennant=50kt, full barb=10kt, half barb=5kt, circle=calm</div><div class="item"><span style="width:12px;height:12px;background:#e0554a;opacity:.5;display:inline-block;border-radius:2px;"></span> CAPE (positive area)</div><div class="item"><span style="width:12px;height:12px;background:#4a90c4;opacity:.5;display:inline-block;border-radius:2px;"></span> CIN (negative area)</div></div>
@@ -175,7 +189,7 @@
   <div class="chart-card" id="hodoCard" style="display: block; margin-top: 16px;">
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:.08em;
       text-transform:uppercase;margin-bottom:10px;">Hodograph — wind vector by height (kt)</div>
-    <canvas id="hodoCanvas" style="width: 100%; max-width: 460px; display: block; margin: 0px auto; height: 460px;" width="460" height="460"></canvas>
+    <canvas id="hodoCanvas" style="width: 100%; max-width: 460px; display: block; margin: 0px auto; height: 460px;" width="920" height="920"></canvas>
   </div>
 
   <footer>
@@ -196,6 +210,7 @@ const EMBEDDED_DATA = [["2026-07-18 07:28:05",1014.0,962.32,23.33,72.2,18.04,0.0
 
 const state = { rows: EMBEDDED_DATA, isDefault: true, source: 'Default data (2026-07-18)', sondeId: '17354',
   rows2: null, source2: null };
+let printMode = false;
 
 function magnusDewpoint(T, RH){
   const rh = Math.min(100, Math.max(1, RH));
@@ -554,7 +569,7 @@ function renderLegend(){
 function layoutChart(rows){
   const dpr = window.devicePixelRatio || 1;
   const cssWidth = canvas.parentElement.clientWidth;
-  const cssHeight = Math.max(520, Math.min(760, cssWidth*0.62));
+  const cssHeight = printMode ? Math.min(300, cssWidth*0.4) : Math.max(520, Math.min(760, cssWidth*0.62));
   canvas.width = cssWidth*dpr;
   canvas.height = cssHeight*dpr;
   canvas.style.height = cssHeight+'px';
@@ -562,16 +577,18 @@ function layoutChart(rows){
 
   const windRowsAll = rows.filter(r=>r[6]!=null && r[7]!=null);
   const hasWind = windRowsAll.length>0;
-  const pad = {left:56, right: hasWind ? 172 : 34, top:22, bottom:44};
+  const pad = printMode
+    ? {left:40, right: hasWind ? 130 : 24, top:12, bottom:26}
+    : {left:56, right: hasWind ? 172 : 34, top:22, bottom:44};
   const plotW = cssWidth - pad.left - pad.right;
   const plotH = cssHeight - pad.top - pad.bottom;
 
   // wind sub-panels, laid out to the right of the main plot
-  const speedX0 = pad.left + plotW + 20;
-  const speedW = 72;
+  const speedX0 = pad.left + plotW + (printMode ? 14 : 20);
+  const speedW = printMode ? 50 : 72;
   const speedX1 = speedX0 + speedW;
-  const windColX = speedX1 + 38;
-  const rightEdge = windColX + 24;
+  const windColX = speedX1 + (printMode ? 26 : 38);
+  const rightEdge = windColX + (printMode ? 16 : 24);
 
   const maxKt = hasWind ? Math.max(...windRowsAll.map(r=>msToKt(r[6]))) : 0;
   const sMax = Math.max(20, Math.ceil((maxKt+3)/10)*10);
@@ -988,7 +1005,7 @@ function drawHodograph(rows){
 
   const canvas2 = document.getElementById('hodoCanvas');
   const dpr = window.devicePixelRatio || 1;
-  const size = Math.min(460, canvas2.parentElement.clientWidth);
+  const size = printMode ? Math.min(200, canvas2.parentElement.clientWidth) : Math.min(460, canvas2.parentElement.clientWidth);
   canvas2.width = size*dpr; canvas2.height = size*dpr;
   canvas2.style.height = size+'px';
   const hctx = canvas2.getContext('2d');
@@ -1332,11 +1349,15 @@ let _preprintTheme = null;
 window.addEventListener('beforeprint', ()=>{
   _preprintTheme = document.documentElement.dataset.theme || '';
   document.documentElement.dataset.theme = 'light';
+  printMode = true;
   draw(state.rows);
+  drawHodograph(state.rows);
 });
 window.addEventListener('afterprint', ()=>{
   document.documentElement.dataset.theme = _preprintTheme || '';
+  printMode = false;
   draw(state.rows);
+  drawHodograph(state.rows);
 });
 
 (async function init(){
