@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0064)file:///C:/Users/wpabalwic/Downloads/Stueve_Diagramm_Tool_5.html -->
+<!-- saved from url=(0064)file:///C:/Users/wpabalwic/Downloads/Stueve_Diagramm_Tool_6.html -->
 <html lang="en" data-theme="light"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,7 +72,7 @@
     font-family:var(--mono);font-size:12px;padding:9px 14px;border-radius:6px;cursor:pointer;}
   .reset-btn:hover{color:var(--text);border-color:var(--text-dim);}
 
-  .stat-strip{display:grid;grid-template-columns:repeat(9,1fr);gap:1px;background:var(--line);
+  .stat-strip{display:grid;grid-template-columns:repeat(10,1fr);gap:1px;background:var(--line);
     border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:18px;}
   .stat{background:var(--panel);padding:10px 14px;}
   .stat .k{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;}
@@ -151,7 +151,20 @@
         <input type="file" id="compareInput" accept=".csv">
       </label>
       <button class="reset-btn" id="removeCompareBtn" style="display:none;">✕ Remove comparison</button>
+      <div style="display:flex;flex-direction:column;gap:3px;">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.06em;">BARB DENSITY</label>
+        <select id="barbDensitySelect" style="background:var(--panel-2);border:1px solid var(--line);
+          color:var(--text);font-family:var(--mono);font-size:12px;padding:7px 8px;border-radius:6px;">
+          <option value="0">All measurements</option>
+          <option value="1">Every 1s</option>
+          <option value="15" selected="">Every 15s</option>
+          <option value="30">Every 30s</option>
+          <option value="45">Every 45s</option>
+          <option value="60">Every 1min</option>
+        </select>
+      </div>
       <button class="reset-btn" id="exportBtn">⬇ Export CSV</button>
+      <button class="reset-btn" id="windSmoothBtn">〜 Smoothed wind</button>
       <button class="reset-btn" id="shareBtn">🔗 Create link</button>
       <button class="reset-btn" id="themeBtn" title="Toggle light/dark">🌗 View</button>
       <button class="reset-btn" id="printBtn">🖨 Print</button>
@@ -167,29 +180,21 @@
     <button class="reset-btn" id="copyBtn" style="padding:6px 12px;">Copy</button>
   </div>
 
-  <div class="stat-strip" id="statStrip"><div class="stat"><div class="k">Sonde ID</div><div class="v">17354</div></div><div class="stat"><div class="k">Start (UTC)</div><div class="v">07:28:05</div></div><div class="stat"><div class="k">Peak (UTC)</div><div class="v">08:17:20</div></div><div class="stat"><div class="k">Max. altitude</div><div class="v">2859 m MSL</div></div><div class="stat"><div class="k">Pressure start → peak</div><div class="v">962 → 733 hPa</div></div><div class="stat"><div class="k">Temp min / max</div><div class="v">6.4 / 25.3 °C</div></div><div class="stat"><div class="k">Wind max</div><div class="v">26 kt</div></div><div class="stat"><div class="k">Inversions</div><div class="v">none detected</div></div><div class="stat"><div class="k">Data points</div><div class="v">2244</div></div></div>
+  <div class="stat-strip" id="statStrip"><div class="stat"><div class="k">Sonde ID</div><div class="v">17354</div></div><div class="stat"><div class="k">Start (UTC)</div><div class="v">07:28:05</div></div><div class="stat"><div class="k">Peak (UTC)</div><div class="v">08:17:20</div></div><div class="stat"><div class="k">Max. altitude</div><div class="v">2859 m MSL</div></div><div class="stat"><div class="k">Pressure start → peak</div><div class="v">962 → 733 hPa</div></div><div class="stat"><div class="k">Temp min / max</div><div class="v">6.4 / 25.3 °C</div></div><div class="stat"><div class="k">Wind max</div><div class="v">26 kt</div></div><div class="stat"><div class="k">Inversions</div><div class="v">2 layers</div></div><div class="stat"><div class="k">Isothermal layers</div><div class="v">none detected</div></div><div class="stat"><div class="k">Data points</div><div class="v">2244</div></div></div>
   <div class="stat-strip" id="thermoStrip" style="grid-template-columns:repeat(5,1fr);"><div class="stat"><div class="k">LCL</div><div class="v">890 hPa / 16.8°C</div></div><div class="stat"><div class="k">CAPE</div><div class="v">85 J/kg</div></div><div class="stat"><div class="k">CIN</div><div class="v">4 J/kg</div></div><div class="stat"><div class="k">Freezing level</div><div class="v">not in sounding</div></div><div class="stat"><div class="k">Tropopause</div><div class="v">not reached</div></div></div>
 
   <div class="chart-card">
     <div class="chart-wrap">
       <canvas id="chart" width="2644" height="1520" style="height: 760px;"></canvas>
-      <div id="tooltip" style="display: none; left: 1132px; top: 4px;">
-    <div class="hdr">2026-07-18 08:11:24 UTC</div>
-    <div class="row"><span class="lbl">Altitude</span><span>1906 m</span></div>
-    <div class="row"><span class="lbl">Pressure</span><span>817.0 hPa</span></div>
-    <div class="row"><span class="lbl">Temp</span><span>12.5 °C</span></div>
-    <div class="row"><span class="lbl">Dew point</span><span>9.2 °C</span></div>
-    <div class="row"><span class="lbl">RH</span><span>81 %</span></div>
-    <div class="row"><span class="lbl">Wind</span><span>13 kt / 269°</span></div>
-  </div>
+      <div id="tooltip"></div>
     </div>
-    <div class="legend" id="legend"><div class="item"><span class="swatch " style="border-top-color:var(--temp)"></span>Temperature</div><div class="item"><span class="swatch " style="border-top-color:var(--dew)"></span>Dew point</div><div class="item"><span class="swatch " style="border-top-color:var(--grid-isobar)"></span>Isobars (pressure)</div><div class="item"><span class="swatch dot" style="border-top-color:var(--grid-isotherm)"></span>Isotherms</div><div class="item"><span class="swatch dash" style="border-top-color:var(--grid-adiabat)"></span>Dry adiabats</div><div class="item"><span class="swatch dash" style="border-top-color:var(--grid-moist)"></span>Moist adiabats</div><div class="item"><span class="swatch " style="border-top-color:var(--wind-line)"></span>Wind speed (kt)</div><div class="item"><span class="swatch " style="border-top-color:var(--text-dim)"></span>Inversion (temp. increases with height)</div><div class="item"><span class="swatch dash" style="border-top-color:var(--amber)"></span>Parcel path (LCL → moist adiabat)</div><div class="item">🎌 Wind barb: pennant=50kt, full barb=10kt, half barb=5kt, circle=calm</div><div class="item"><span style="width:12px;height:12px;background:#e0554a;opacity:.5;display:inline-block;border-radius:2px;"></span> CAPE (positive area)</div><div class="item"><span style="width:12px;height:12px;background:#4a90c4;opacity:.5;display:inline-block;border-radius:2px;"></span> CIN (negative area)</div></div>
+    <div class="legend" id="legend"><div class="item"><span class="swatch " style="border-top-color:var(--temp)"></span>Temperature</div><div class="item"><span class="swatch " style="border-top-color:var(--dew)"></span>Dew point</div><div class="item"><span class="swatch " style="border-top-color:var(--grid-isobar)"></span>Isobars (pressure)</div><div class="item"><span class="swatch dot" style="border-top-color:var(--grid-isotherm)"></span>Isotherms</div><div class="item"><span class="swatch dash" style="border-top-color:var(--grid-adiabat)"></span>Dry adiabats</div><div class="item"><span class="swatch dash" style="border-top-color:var(--grid-moist)"></span>Moist adiabats</div><div class="item"><span class="swatch " style="border-top-color:var(--wind-line)"></span>Wind speed (kt) — smoothed</div><div class="item"><span class="swatch " style="border-top-color:var(--text-dim)"></span>Inversion (temp. increases with height)</div><div class="item"><span class="swatch " style="border-top-color:var(--grid-isotherm)"></span>Isothermal layer (temp. constant with height)</div><div class="item"><span class="swatch dash" style="border-top-color:var(--amber)"></span>Parcel path (LCL → moist adiabat)</div><div class="item">🎌 Wind barb: pennant=50kt, full barb=10kt, half barb=5kt, circle=calm</div><div class="item"><span style="width:12px;height:12px;background:#e0554a;opacity:.5;display:inline-block;border-radius:2px;"></span> CAPE (positive area)</div><div class="item"><span style="width:12px;height:12px;background:#4a90c4;opacity:.5;display:inline-block;border-radius:2px;"></span> CIN (negative area)</div></div>
   </div>
 
   <div class="chart-card" id="hodoCard" style="display: block; margin-top: 16px;">
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:.08em;
       text-transform:uppercase;margin-bottom:10px;">Hodograph — wind vector by height (kt)</div>
-    <canvas id="hodoCanvas" style="width: 100%; max-width: 460px; display: block; margin: 0px auto; height: 460px;" width="920" height="920"></canvas>
+    <canvas id="hodoCanvas" style="display: block; margin: 0px auto; width: 460px; height: 460px;" width="920" height="920"></canvas>
   </div>
 
   <footer>
@@ -209,7 +214,7 @@ const EMBEDDED_DATA = [["2026-07-18 07:28:05",1014.0,962.32,23.33,72.2,18.04,0.0
 // columns: [utcTime, altMSL_m, pressure_hPa, temp_C, rh_pct, dewpoint_C, windSpeed_ms|null, windHeading_deg|null, lat|null, lon|null]
 
 const state = { rows: EMBEDDED_DATA, isDefault: true, source: 'Default data (2026-07-18)', sondeId: '17354',
-  rows2: null, source2: null };
+  rows2: null, source2: null, windSmoothed: true, barbIntervalSec: 15 };
 let printMode = false;
 
 function magnusDewpoint(T, RH){
@@ -381,6 +386,61 @@ function nearestByPressure(rows, targetHpa){
   return best>=0 ? rows[best] : null;
 }
 
+// Circular mean for wind direction (degrees) — needed because averaging e.g.
+// 350° and 10° arithmetically gives 180° (wrong); vector averaging gives 0°.
+function circularMeanDeg(anglesDeg){
+  let sx=0, sy=0;
+  for(const a of anglesDeg){ const r=a*Math.PI/180; sx+=Math.cos(r); sy+=Math.sin(r); }
+  let mean = Math.atan2(sy,sx)*180/Math.PI;
+  if(mean<0) mean += 360;
+  return mean;
+}
+
+// Moving-average smoothing of wind speed/heading over a small window
+// (speed: linear mean; heading: circular mean). Operates on rows already
+// filtered to have wind data, preserving their pressure/altitude/time.
+function smoothWindRows(windRows, halfWin=7){
+  const n = windRows.length;
+  const out = new Array(n);
+  for(let i=0;i<n;i++){
+    const lo = Math.max(0,i-halfWin), hi = Math.min(n-1,i+halfWin);
+    const speeds=[], dirs=[];
+    for(let j=lo;j<=hi;j++){ speeds.push(windRows[j][6]); dirs.push(windRows[j][7]); }
+    const avgSpeed = speeds.reduce((a,b)=>a+b,0)/speeds.length;
+    const avgDir = circularMeanDeg(dirs);
+    const r = windRows[i].slice();
+    r[6] = avgSpeed; r[7] = avgDir;
+    out[i] = r;
+  }
+  return out;
+}
+
+// Returns the wind-bearing rows to actually plot: raw measurements or the
+// smoothed version, depending on the current toggle state.
+function activeWindRows(rows){
+  const raw = rows.filter(r=>r[6]!=null && r[7]!=null);
+  return state.windSmoothed ? smoothWindRows(raw) : raw;
+}
+
+function parseUtcSeconds(tStr){
+  const t = Date.parse(String(tStr).trim().replace(' ','T')+'Z');
+  return isFinite(t) ? t/1000 : null;
+}
+
+// Thins a time-ordered row list so consecutive kept points are at least
+// intervalSec apart (0 = keep every point).
+function filterByInterval(rows, intervalSec){
+  if(!intervalSec || intervalSec<=0) return rows;
+  const out = [];
+  let lastT = -Infinity;
+  for(const r of rows){
+    const t = parseUtcSeconds(r[0]);
+    if(t==null){ out.push(r); continue; }
+    if(t - lastT >= intervalSec - 0.5){ out.push(r); lastT = t; }
+  }
+  return out;
+}
+
 // Draws a standard meteorological wind barb at (cx,cy). dirFromDeg: compass
 // direction the wind is blowing FROM (0=N,90=E). speedKt: wind speed in knots.
 function drawWindBarb(ctx, cx, cy, speedKt, dirFromDeg, color){
@@ -512,6 +572,7 @@ function computeStats(rows){
 function renderStats(rows){
   const s = computeStats(rows);
   const invCount = detectInversions(rows).length;
+  const isoCount = detectIsothermalLayers(rows).length;
   const items = [
     ['Sonde ID', state.sondeId || 'n/a'],
     ['Start (UTC)', s.t0.split(' ')[1] || s.t0],
@@ -521,6 +582,7 @@ function renderStats(rows){
     ['Temp min / max', s.minT.toFixed(1)+' / '+s.maxT.toFixed(1)+' °C'],
     ['Wind max', s.maxWindKt!=null ? s.maxWindKt.toFixed(0)+' kt' : 'n/a'],
     ['Inversions', invCount>0 ? invCount+' layer'+(invCount>1?'s':'') : 'none detected'],
+    ['Isothermal layers', isoCount>0 ? isoCount+' layer'+(isoCount>1?'s':'') : 'none detected'],
     ['Data points', s.n],
   ];
   document.getElementById('statStrip').innerHTML = items.map(([k,v])=>
@@ -552,8 +614,9 @@ function renderLegend(){
     ['Isotherms', 'var(--grid-isotherm)', 'dot'],
     ['Dry adiabats', 'var(--grid-adiabat)', 'dash'],
     ['Moist adiabats', 'var(--grid-moist)', 'dash'],
-    ['Wind speed (kt)', 'var(--wind-line)', 'solid'],
+    ['Wind speed (kt)'+(state.windSmoothed?' — smoothed':' — raw'), 'var(--wind-line)', 'solid'],
     ['Inversion (temp. increases with height)', 'var(--text-dim)', 'solid'],
+    ['Isothermal layer (temp. constant with height)', 'var(--grid-isotherm)', 'solid'],
     ['Parcel path (LCL → moist adiabat)', 'var(--amber)', 'dash'],
   ];
   document.getElementById('legend').innerHTML = items.map(([label,color,style])=>
@@ -575,7 +638,7 @@ function layoutChart(rows){
   canvas.style.height = cssHeight+'px';
   ctx.setTransform(dpr,0,0,dpr,0,0);
 
-  const windRowsAll = rows.filter(r=>r[6]!=null && r[7]!=null);
+  const windRowsAll = activeWindRows(rows);
   const hasWind = windRowsAll.length>0;
   const pad = printMode
     ? {left:40, right: hasWind ? 130 : 24, top:12, bottom:26}
@@ -620,31 +683,57 @@ function layoutChart(rows){
 // Flags altitude bands where (smoothed) temperature increases with height —
 // a temperature inversion. Uses a moving average to suppress sensor noise
 // and a minimum run length so single noisy samples aren't flagged.
-function detectInversions(rows){
+// Detects both inversion layers (temperature rises with height) and
+// isothermal layers (temperature stays ~constant with height) — the two
+// standard "notable layer" markings on a sounding. Shares the same
+// ground-idle trimming and smoothing as before.
+function detectThermalLayers(rowsIn){
+  if(rowsIn.length < 20) return [];
+  const minAlt = Math.min(...rowsIn.map(r=>r[1]));
+  let launchIdx = 0;
+  for(let i=0;i<rowsIn.length;i++){ if(rowsIn[i][1] < minAlt+30) launchIdx = i; }
+  const rows = rowsIn.slice(launchIdx);
   const n = rows.length;
-  if(n < 20) return [];
+  if(n < 10) return [];
+
   const temps = rows.map(r=>r[3]);
-  const win = Math.max(3, Math.round(n*0.005));
+  const win = Math.max(2, Math.round(n*0.004));
   const sm = new Array(n);
   for(let i=0;i<n;i++){
     let s=0,c=0;
     for(let j=Math.max(0,i-win); j<=Math.min(n-1,i+win); j++){ s+=temps[j]; c++; }
     sm[i] = s/c;
   }
-  const minRun = Math.max(6, Math.round(n*0.006));
+
+  const invThresh = 0.003, isoThresh = 0.0012;
+  const minRun = Math.max(4, Math.round(n*0.003));
+
+  function classify(d){
+    if(d > invThresh) return 'inversion';
+    if(Math.abs(d) <= isoThresh) return 'isothermal';
+    return null;
+  }
+
   const layers = [];
   let i = 0;
   while(i < n-1){
-    if(sm[i+1] - sm[i] > 0.004){
+    const kind = classify(sm[i+1]-sm[i]);
+    if(kind){
       let j = i;
-      while(j < n-1 && sm[j+1]-sm[j] > -0.01) j++;
-      if(j - i >= minRun) layers.push([i,j]);
+      while(j < n-1 && classify(sm[j+1]-sm[j]) === kind) j++;
+      if(j - i >= minRun) layers.push({a:i, b:j, kind});
       i = j+1;
     } else i++;
   }
   return layers
-    .map(([a,b])=>({p0: rows[a][2], p1: rows[b][2]}))
-    .filter(l => Math.abs(l.p0-l.p1) >= 1.0); // ignore near-zero height segments (e.g. pre-launch ground phase)
+    .map(({a,b,kind})=>({p0: rows[a][2], p1: rows[b][2], kind}))
+    .filter(l => Math.abs(l.p0-l.p1) >= 0.4);
+}
+function detectInversions(rows){
+  return detectThermalLayers(rows).filter(l=>l.kind==='inversion');
+}
+function detectIsothermalLayers(rows){
+  return detectThermalLayers(rows).filter(l=>l.kind==='isothermal');
 }
 
 // Diagonal hatch fill for a rectangle (used for inversion bands).
@@ -743,13 +832,19 @@ function draw(rows){
   ctx.rect(pad.left, pad.top, plotW, plotH);
   ctx.clip();
 
-  // Inversion shading: bands where temperature increases with height —
-  // shown as a diagonally hatched gray band (standard convention).
+  // Notable-layer shading: inversions (temp rises with height, gray hatch)
+  // and isothermal layers (temp ~constant with height, blue hatch).
   const inversions = detectInversions(rows);
   inversions.forEach(({p0,p1})=>{
     const yA = yScale(yOf(p0)), yB = yScale(yOf(p1));
     const top = Math.min(yA,yB), h = Math.max(Math.abs(yA-yB), 1.5);
     drawHatchedRect(ctx, pad.left, top, plotW, h, cTextDim);
+  });
+  const isoLayers = detectIsothermalLayers(rows);
+  isoLayers.forEach(({p0,p1})=>{
+    const yA = yScale(yOf(p0)), yB = yScale(yOf(p1));
+    const top = Math.min(yA,yB), h = Math.max(Math.abs(yA-yB), 1.5);
+    drawHatchedRect(ctx, pad.left, top, plotW, h, cIso);
   });
 
   // Isotherms (vertical, every 5°C)
@@ -983,15 +1078,15 @@ function draw(rows){
   ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
   ctx.fillText('Direction', windColX, pad.top-6);
 
-  for(let p=1050;p>=550;p-=25){
-    const yv = yOf(p);
+  // One barb per measurement point, thinned to the selected density.
+  const barbRows = filterByInterval(windRowsAll, state.barbIntervalSec);
+  for(let i=0; i<barbRows.length; i++){
+    const r = barbRows[i];
+    const yv = yOf(r[2]);
     if(yv<Ymin || yv>Ymax) continue;
     const y = yScale(yv);
-    const nearest = nearestByPressure(windRowsAll, p);
-    if(!nearest) continue;
-    if(Math.abs(nearest[2]-p) > 15) continue;
-    const kt = msToKt(nearest[6]);
-    const dirFrom = windFromDeg(nearest[7]);
+    const kt = msToKt(r[6]);
+    const dirFrom = windFromDeg(r[7]);
     drawWindBarb(ctx, windColX, y, kt, dirFrom, cWindBarb);
   }
 }
@@ -999,7 +1094,7 @@ function draw(rows){
 // ---------- Hodograph ----------
 function drawHodograph(rows){
   const card = document.getElementById('hodoCard');
-  const windRows = rows.filter(r=>r[6]!=null && r[7]!=null);
+  const windRows = activeWindRows(rows);
   if(windRows.length < 2){ card.style.display='none'; return; }
   card.style.display = 'block';
 
@@ -1007,6 +1102,7 @@ function drawHodograph(rows){
   const dpr = window.devicePixelRatio || 1;
   const size = printMode ? Math.min(200, canvas2.parentElement.clientWidth) : Math.min(460, canvas2.parentElement.clientWidth);
   canvas2.width = size*dpr; canvas2.height = size*dpr;
+  canvas2.style.width = size+'px';
   canvas2.style.height = size+'px';
   const hctx = canvas2.getContext('2d');
   hctx.setTransform(dpr,0,0,dpr,0,0);
@@ -1190,6 +1286,17 @@ document.getElementById('exportBtn').addEventListener('click', ()=>{
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+});
+
+document.getElementById('windSmoothBtn').addEventListener('click', ()=>{
+  state.windSmoothed = !state.windSmoothed;
+  document.getElementById('windSmoothBtn').textContent = state.windSmoothed ? '〜 Smoothed wind' : '〜 Raw wind';
+  renderAll();
+});
+
+document.getElementById('barbDensitySelect').addEventListener('change', (e)=>{
+  state.barbIntervalSec = parseInt(e.target.value, 10) || 0;
+  draw(state.rows);
 });
 
 document.getElementById('compareInput').addEventListener('change', (e)=>{
