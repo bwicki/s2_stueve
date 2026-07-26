@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0065)file:///C:/Users/wpabalwic/Downloads/Stueve_Diagramm_Tool_23.html -->
+<!-- saved from url=(0065)file:///C:/Users/wpabalwic/Downloads/Stueve_Diagramm_Tool_25.html -->
 <html lang="en" data-theme="light"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -320,6 +320,9 @@
         <div style="font-family:var(--mono);font-size:10.5px;color:var(--text-dim);letter-spacing:.06em;
           text-transform:uppercase;margin-bottom:8px;">Flight path</div>
         <div id="mapContainer" style="width:100%;border-radius:6px;overflow:hidden;background:var(--panel);"></div>
+        <canvas id="mapFallbackCanvas" style="display:none;width:100%;"></canvas>
+        <div id="mapFallbackNote" style="display:none;font-size:9.5px;color:var(--text-dim);
+          font-family:var(--mono);margin-top:6px;">Map tiles unavailable (offline or blocked by network) — showing flight path only.</div>
       </div>
     </div>
 
@@ -1710,8 +1713,16 @@ function renderFlightMap(rows){
   // for datasets loaded via an older share link) where peak == last point.
   const useFull = Array.isArray(state.fullTrail) && state.fullTrail.length >= 2;
   const trail = useFull ? state.fullTrail : rows.filter(r=>r[8]!=null && r[9]!=null).map(r=>[r[8], r[9], r[1]]);
-  if(trail.length < 2 || typeof L === 'undefined'){ card.style.display='none'; return; }
+  if(trail.length < 2){ card.style.display='none'; return; }
   card.style.display = 'block';
+
+  if(typeof L === 'undefined'){
+    drawFlightPathFallback(trail);
+    return;
+  }
+  document.getElementById('mapFallbackCanvas').style.display = 'none';
+  document.getElementById('mapFallbackNote').style.display = 'none';
+  document.getElementById('mapContainer').style.display = 'block';
 
   const container = document.getElementById('mapContainer');
   const h = printMode ? 130 : Math.max(240, Math.min(360, container.clientWidth*0.6));
@@ -1747,8 +1758,74 @@ function renderFlightMap(rows){
       .addTo(LEAFLET_MAP).bindTooltip(useFull ? 'Last received position' : 'Last data point');
     LEAFLET_MAP.fitBounds(line.getBounds(), {padding:[18,18]});
   }catch(err){
-    card.style.display = 'none';
+    drawFlightPathFallback(trail);
   }
+}
+
+// Self-contained schematic flight-path plot (no basemap tiles, no external
+// dependency at all) — used whenever Leaflet couldn't be loaded, e.g. a
+// corporate network/firewall blocking the CDN. Guarantees the flight path
+// and all three markers are still visible.
+function drawFlightPathFallback(trail){
+  document.getElementById('mapContainer').style.display = 'none';
+  document.getElementById('mapFallbackNote').style.display = 'block';
+  const canvas = document.getElementById('mapFallbackCanvas');
+  canvas.style.display = 'block';
+
+  const dpr = window.devicePixelRatio || 1;
+  const cssWidth = canvas.parentElement.clientWidth;
+  const cssHeight = printMode ? 130 : Math.max(240, Math.min(360, cssWidth*0.6));
+  canvas.width = cssWidth*dpr; canvas.height = cssHeight*dpr;
+  canvas.style.height = cssHeight+'px';
+  const ctx2 = canvas.getContext('2d');
+  ctx2.setTransform(dpr,0,0,dpr,0,0);
+  ctx2.clearRect(0,0,cssWidth,cssHeight);
+
+  const rootStyle = getComputedStyle(document.documentElement);
+  const cv2 = n => rootStyle.getPropertyValue(n).trim();
+  const pad = 20;
+  const lats = trail.map(t=>t[0]), lons = trail.map(t=>t[1]);
+  const latMin = Math.min(...lats), latMax = Math.max(...lats);
+  const lonMin = Math.min(...lons), lonMax = Math.max(...lons);
+  const midLat = (latMin+latMax)/2;
+  const lonScale = Math.cos(midLat*Math.PI/180);
+  const w = Math.max((lonMax-lonMin)*lonScale, 1e-6);
+  const hgt = Math.max(latMax-latMin, 1e-6);
+  const plotW = cssWidth-2*pad, plotH = cssHeight-2*pad;
+  const scale = Math.min(plotW/w, plotH/hgt);
+  const cx = pad + (plotW - w*scale)/2, cy = pad + (plotH - hgt*scale)/2;
+  const X = lon => cx + (lon-lonMin)*lonScale*scale;
+  const Y = lat => cy + (latMax-lat)*scale; // lat increases upward
+
+  ctx2.strokeStyle = cv2('--line');
+  ctx2.lineWidth = 1;
+  ctx2.strokeRect(0.5,0.5,cssWidth-1,cssHeight-1);
+
+  ctx2.strokeStyle = '#e0554a';
+  ctx2.lineWidth = 2;
+  ctx2.beginPath();
+  trail.forEach((t,i)=>{
+    const x=X(t[1]), y=Y(t[0]);
+    if(i===0) ctx2.moveTo(x,y); else ctx2.lineTo(x,y);
+  });
+  ctx2.stroke();
+
+  let topIdx=0;
+  for(let i=1;i<trail.length;i++) if(trail[i][2]>trail[topIdx][2]) topIdx=i;
+
+  function marker(t, color, ring){
+    const x=X(t[1]), y=Y(t[0]);
+    ctx2.fillStyle = color;
+    ctx2.beginPath(); ctx2.arc(x,y,5,0,Math.PI*2); ctx2.fill();
+    ctx2.strokeStyle = ring; ctx2.lineWidth = 1.5;
+    ctx2.beginPath(); ctx2.arc(x,y,5,0,Math.PI*2); ctx2.stroke();
+  }
+  marker(trail[0], '#3fae5a', '#1a6b30');
+  marker(trail[trail.length-1], '#8fa0bd', '#3a4a63');
+  const tx = X(trail[topIdx][1]), ty = Y(trail[topIdx][0]);
+  ctx2.font = '18px sans-serif';
+  ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
+  ctx2.fillText('💥', tx, ty);
 }
 
 // ---------- Hodograph ----------
@@ -1941,7 +2018,7 @@ function renderAll(){
   const hasWindData = activeWindRows(state.rows).length >= 2;
   const hasRiseData = state.rows.filter(r=>r[10]!=null).length >= 5;
   const hasThetaData = state.rows.length >= 5;
-  const hasMapData = state.rows.filter(r=>r[8]!=null && r[9]!=null).length >= 2 && typeof L !== 'undefined';
+  const hasMapData = state.rows.filter(r=>r[8]!=null && r[9]!=null).length >= 2;
   document.getElementById('hodoCard').style.display = hasWindData ? 'block' : 'none';
   document.getElementById('riseCard').style.display = hasRiseData ? 'block' : 'none';
   document.getElementById('thetaECard').style.display = hasThetaData ? 'block' : 'none';
