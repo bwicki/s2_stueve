@@ -1,7 +1,7 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde
+# Stueve Diagram Tool — S2/RR4 Radiosonde
 
 A self-contained, single-file web app for visualizing radiosonde ascent data
-(Stüve diagram, Emagram, or Skew-T) from the S2/RR4 system. No installation,
+(Stueve diagram, Emagram, or Skew-T) from the S2/RR4 system. No installation,
 no server, no build step — open the HTML file in a browser, or host it as a
 static page (e.g. GitHub Pages).
 
