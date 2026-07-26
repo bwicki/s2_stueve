@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0065)file:///C:/Users/wpabalwic/Downloads/Stueve_Diagramm_Tool_22.html -->
+<!-- saved from url=(0065)file:///C:/Users/wpabalwic/Downloads/Stueve_Diagramm_Tool_23.html -->
 <html lang="en" data-theme="light"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -166,10 +166,10 @@
       <div class="title-block">
         <div class="eyebrow">S2 / RR4 · Radiosonde Telemetry</div>
         <h1>Stüve Diagram from S2/RR4 Sonde Data</h1>
-        <p id="subtitle">Ascent 2026-07-25 14:56:46 UTC · 9317 m MSL peak altitude · Sample data (2026-07-25) · all times in UTC</p>
+        <p id="subtitle">Radiosonde ascent — loading…</p>
         <p style="margin:2px 0 0;font-size:12px;color:var(--text-dim);font-family:var(--mono);
           display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <span id="launchLoc">📍 Launch: 47.1761°N, 7.4027°E · near Grenchen, Schweiz</span>
+          <span id="launchLoc"></span>
           <span>· v17 (2026-07-23)</span>
         </p>
       </div>
@@ -232,17 +232,20 @@
     </div>
   </header>
 
-  <div id="shareBar" style="display: flex; margin: -6px 0px 18px; padding: 10px 14px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; font-family: var(--mono); font-size: 11.5px; flex-direction: column; gap: 8px;">
+  <div id="shareBar" style="display:none;margin:-6px 0 18px;padding:10px 14px;background:var(--panel-2);
+      border:1px solid var(--line);border-radius:8px;font-family:var(--mono);font-size:11.5px;
+      flex-direction:column;gap:8px;">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <span style="color:var(--text-dim);">Link (data is encoded directly in the link):</span>
       <input id="shareUrl" readonly="" style="flex:1;min-width:220px;background:var(--bg);border:1px solid var(--line);
         color:var(--text);font-family:var(--mono);font-size:11px;padding:6px 8px;border-radius:5px;">
       <button class="reset-btn" id="copyBtn" style="padding:6px 12px;">Copy</button>
     </div>
-    <div id="shareNote" style="color:var(--text-dim);font-size:10.5px;">Full-resolution link (all 2587 points, nothing thinned). Length: 83 characters.</div>
+    <div id="shareNote" style="color:var(--text-dim);font-size:10.5px;"></div>
   </div>
 
-  <div id="emptyState" style="text-align: center; padding: 70px 20px; border: 1px dashed var(--line); border-radius: 10px; margin-bottom: 18px; display: none;">
+  <div id="emptyState" style="text-align:center;padding:70px 20px;border:1px dashed var(--line);
+      border-radius:10px;margin-bottom:18px;">
     <div style="font-size:34px;margin-bottom:14px;">🎈</div>
     <div style="font-family:var(--sans);font-size:16px;color:var(--text);margin-bottom:8px;">No sounding loaded yet</div>
     <div style="font-family:var(--mono);font-size:12.5px;color:var(--text-dim);max-width:440px;margin:0 auto;line-height:1.7;">
@@ -251,9 +254,9 @@
     </div>
   </div>
 
-  <div id="dataView" style="display: block;">
-  <div class="stat-strip" id="statStrip"><div class="stat"><div class="k">Sonde ID</div><div class="v">17354</div></div><div class="stat"><div class="k">Start (UTC)</div><div class="v">14:56:46</div></div><div class="stat"><div class="k">Peak (UTC)</div><div class="v">16:07:41</div></div><div class="stat"><div class="k">Max. altitude</div><div class="v">9317 m MSL</div></div><div class="stat"><div class="k">Pressure start → peak</div><div class="v">956 → 306 hPa</div></div><div class="stat"><div class="k">Temp min / max</div><div class="v">-33.5 / 29.6 °C</div></div><div class="stat"><div class="k">Wind max</div><div class="v">39 kt</div></div><div class="stat"><div class="k">Inversions</div><div class="v">2 layers</div></div><div class="stat"><div class="k">Isothermal layers</div><div class="v">none detected</div></div><div class="stat"><div class="k">Data points</div><div class="v">2587</div></div></div>
-  <div class="stat-strip" id="thermoStrip" style="grid-template-columns:repeat(auto-fit,minmax(184px,1fr));"><div class="stat"><div class="k">LCL</div><div class="v">775 hPa / 12.0°C</div></div><div class="stat"><div class="k">CAPE</div><div class="v">539 J/kg</div></div><div class="stat"><div class="k">CIN</div><div class="v">105 J/kg</div></div><div class="stat"><div class="k">Freezing level</div><div class="v">4293 m MSL</div></div><div class="stat"><div class="k">Tropopause</div><div class="v">not reached</div></div><div class="stat"><div class="k">Thunderstorm chance (est.)</div><div class="v">74% (K=34)</div></div><div class="stat"><div class="k">Cloud cover (est.)</div><div class="v">78%</div></div></div>
+  <div id="dataView" style="display:none;">
+  <div class="stat-strip" id="statStrip"></div>
+  <div class="stat-strip" id="thermoStrip" style="grid-template-columns:repeat(auto-fit,minmax(184px,1fr));"></div>
 
   <div id="anomalyBanner" style="display:none;margin-bottom:16px;padding:10px 14px;background:rgba(224,85,74,.1);
       border:1px solid #e0554a;border-radius:8px;font-family:var(--mono);font-size:12px;color:var(--text);">
@@ -271,60 +274,56 @@
           font-size:11px;flex-shrink:0;position:relative;z-index:3;">⟲</button>
         <div id="altRangeTrack" style="position:relative;flex:1;width:100%;display:flex;justify-content:center;">
           <div style="position:absolute;top:0;bottom:0;width:4px;border-radius:2px;background:var(--line);"></div>
-          <div id="altRangeFill" style="position: absolute; width: 6px; border-radius: 3px; background: rgb(155, 139, 176); opacity: 0.55; left: 50%; transform: translateX(-50%); bottom: 0px; top: 0px;"></div>
-          <input type="range" class="vslider" id="altRangeMax" min="0" max="1000" value="1000" style="height: 708px;">
-          <input type="range" class="vslider" id="altRangeMin" min="0" max="1000" value="0" style="height: 708px;">
+          <div id="altRangeFill" style="position:absolute;width:6px;border-radius:3px;background:#9b8bb0;opacity:0.55;left:50%;transform:translateX(-50%);"></div>
+          <input type="range" class="vslider" id="altRangeMax" min="0" max="1000" value="1000">
+          <input type="range" class="vslider" id="altRangeMin" min="0" max="1000" value="0">
         </div>
       </div>
       <div class="chart-wrap" style="flex:1;">
-        <canvas id="chart" width="1286" height="760" style="height: 760px;"></canvas>
-        <div id="tooltip" style="display: none; left: 1096px; top: 4px;">
-    <div class="hdr">2026-07-25 15:15:58 UTC</div>
-    <div class="row"><span class="lbl">Altitude</span><span>2662 m</span></div>
-    <div class="row"><span class="lbl">Pressure</span><span>738.1 hPa</span></div>
-    <div class="row"><span class="lbl">Temp</span><span>11.8 °C</span></div>
-    <div class="row"><span class="lbl">Dew point</span><span>2.5 °C</span></div>
-    <div class="row"><span class="lbl">RH</span><span>53 %</span></div>
-    <div class="row"><span class="lbl">Wind</span><span>15 kt / 210°</span></div>
-  </div>
+        <canvas id="chart"></canvas>
+        <div id="tooltip"></div>
       </div>
     </div>
 
     <div id="scrubber-row" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line);">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
         <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.06em;white-space:nowrap;">SCRUB TIME</span>
-        <input type="range" id="scrubber" min="0" max="2586" value="0" step="1" style="flex:1;min-width:160px;accent-color:var(--amber);">
+        <input type="range" id="scrubber" min="0" max="1" value="0" step="1" style="flex:1;min-width:160px;accent-color:var(--amber);">
       </div>
-      <div class="stat-strip" id="scrubberReadout" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-bottom:0;"><div class="stat" style="grid-column:1/-1;"><div class="v" style="font-size:12px;color:var(--text-dim);">— drag the slider to inspect a point in time —</div></div></div>
+      <div class="stat-strip" id="scrubberReadout" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-bottom:0;"></div>
     </div>
 
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;">
-      <div id="hodoCard" style="display: block; flex: 1 1 0%; min-width: 220px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 12px;">
+      <div id="hodoCard" style="display:none;flex:1;min-width:220px;background:var(--panel-2);
+          border:1px solid var(--line);border-radius:8px;padding:12px;">
         <div style="font-family:var(--mono);font-size:10.5px;color:var(--text-dim);letter-spacing:.06em;
           text-transform:uppercase;margin-bottom:8px;">Hodograph (kt)</div>
         <div style="position:relative;">
-          <canvas id="hodoCanvas" style="display: block; margin: 0px auto; width: 251.6px; height: 251.6px;" width="251" height="251"></canvas>
+          <canvas id="hodoCanvas" style="display:block;margin:0 auto;"></canvas>
           <div id="hodoTooltip"></div>
         </div>
       </div>
-      <div id="riseCard" style="display: block; flex: 1 1 0%; min-width: 220px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 12px;">
+      <div id="riseCard" style="display:none;flex:1;min-width:220px;background:var(--panel-2);
+          border:1px solid var(--line);border-radius:8px;padding:12px;">
         <div style="font-family:var(--mono);font-size:10.5px;color:var(--text-dim);letter-spacing:.06em;
           text-transform:uppercase;margin-bottom:8px;">Rise speed (m/s)</div>
-        <canvas id="riseCanvas" style="display: block; width: 100%; height: 240px;" width="320" height="240"></canvas>
+        <canvas id="riseCanvas" style="display:block;width:100%;"></canvas>
       </div>
-      <div id="thetaECard" style="display: block; flex: 1 1 0%; min-width: 220px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 12px;">
+      <div id="thetaECard" style="display:none;flex:1;min-width:220px;background:var(--panel-2);
+          border:1px solid var(--line);border-radius:8px;padding:12px;">
         <div style="font-family:var(--mono);font-size:10.5px;color:var(--text-dim);letter-spacing:.06em;
           text-transform:uppercase;margin-bottom:8px;">Theta-E (°C-eq)</div>
-        <canvas id="thetaECanvas" style="display: block; width: 100%; height: 240px;" width="320" height="240"></canvas>
+        <canvas id="thetaECanvas" style="display:block;width:100%;"></canvas>
       </div>
-      <div id="mapCard" style="display: block; flex: 1 1 0%; min-width: 220px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 12px;">
+      <div id="mapCard" style="display:none;flex:1;min-width:220px;background:var(--panel-2);
+          border:1px solid var(--line);border-radius:8px;padding:12px;">
         <div style="font-family:var(--mono);font-size:10.5px;color:var(--text-dim);letter-spacing:.06em;
           text-transform:uppercase;margin-bottom:8px;">Flight path</div>
-        <div id="mapContainer" style="width: 100%; border-radius: 6px; overflow: hidden; background: var(--panel); height: 240px; position: relative;" class="leaflet-container leaflet-touch leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" tabindex="0"><div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(0px, 0px, 0px);"><div class="leaflet-pane leaflet-tile-pane"><div class="leaflet-layer " style="z-index: 1; opacity: 1;"><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 18; transform: translate3d(0px, 0px, 0px) scale(1);"><img alt="" src="./index_files/178.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-63px, -253px, 0px); opacity: 1;"><img alt="" src="./index_files/178(1).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(193px, -253px, 0px); opacity: 1;"><img alt="" src="./index_files/179.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-63px, 3px, 0px); opacity: 1;"><img alt="" src="./index_files/179(1).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(193px, 3px, 0px); opacity: 1;"></div></div></div><div class="leaflet-pane leaflet-overlay-pane"><svg pointer-events="none" class="leaflet-zoom-animated" width="355" height="288" viewBox="-30 -24 355 288" style="transform: translate3d(-30px, -24px, 0px);"><g><path class="leaflet-interactive" stroke="#e0554a" stroke-opacity="1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M72 187L75 184L79 184L83 188L89 188L95 182L98 175L110 160L130 145L138 137L142 129L155 116L162 113L185 98L210 62L223 51"></path><path class="leaflet-interactive" stroke="#1a6b30" stroke-opacity="1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#3fae5a" fill-opacity="1" fill-rule="evenodd" d="M66,187a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path><path class="leaflet-interactive" stroke="#3a4a63" stroke-opacity="1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#8fa0bd" fill-opacity="1" fill-rule="evenodd" d="M217,51a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 "></path></g></svg></div><div class="leaflet-pane leaflet-shadow-pane"></div><div class="leaflet-pane leaflet-marker-pane"><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -13px; margin-top: -13px; width: 26px; height: 26px; transform: translate3d(208px, 66px, 0px); z-index: 66;"><div style="font-size:22px;line-height:26px;width:26px;height:26px;text-align:center;">💥</div></div></div><div class="leaflet-pane leaflet-tooltip-pane"></div><div class="leaflet-pane leaflet-popup-pane"></div><div class="leaflet-proxy leaflet-zoom-animated" style="transform: translate3d(68306.6px, 45940.7px, 0px) scale(256);"></div></div><div class="leaflet-control-container"><div class="leaflet-top leaflet-left"></div><div class="leaflet-top leaflet-right"></div><div class="leaflet-bottom leaflet-left"></div><div class="leaflet-bottom leaflet-right"><div class="leaflet-control-attribution leaflet-control"><a href="https://leafletjs.com/" title="A JavaScript library for interactive maps"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"></path><path fill="#FFD500" d="M0 4h12v3H0z"></path><path fill="#E0BC00" d="M0 7h12v1H0z"></path></svg> Leaflet</a> <span aria-hidden="true">|</span> © OpenStreetMap</div></div></div></div>
+        <div id="mapContainer" style="width:100%;border-radius:6px;overflow:hidden;background:var(--panel);"></div>
       </div>
     </div>
 
-    <div class="legend" id="legend"><div class="item"><span class="swatch " style="border-top-color:var(--temp)"></span>Temperature</div><div class="item"><span class="swatch " style="border-top-color:var(--dew)"></span>Dew point</div><div class="item"><span class="swatch " style="border-top-color:var(--grid-isobar)"></span>Isobars (pressure)</div><div class="item"><span class="swatch dot" style="border-top-color:var(--grid-isotherm)"></span>Isotherms</div><div class="item"><span class="swatch dash" style="border-top-color:var(--grid-adiabat)"></span>Dry adiabats</div><div class="item"><span class="swatch dash" style="border-top-color:var(--grid-moist)"></span>Moist adiabats</div><div class="item"><span class="swatch " style="border-top-color:var(--wind-line)"></span>Wind speed (kt) — smoothed</div><div class="item"><span class="swatch " style="border-top-color:var(--text-dim)"></span>Inversion (temp. increases with height)</div><div class="item"><span class="swatch " style="border-top-color:var(--grid-isotherm)"></span>Isothermal layer (temp. constant with height)</div><div class="item"><span class="swatch dot" style="border-top-color:#5fae7a"></span>Mixing ratio (g/kg)</div><div class="item"><span class="swatch " style="border-top-color:#7fd4e8"></span>Cloud layer (RH ≥ 95%)</div><div class="item"><span class="swatch " style="border-top-color:#8a95a6"></span>Convective development band</div><div class="item"><span class="swatch " style="border-top-color:#3fae5a"></span>Ground / launch-site elevation</div><div class="item"><span class="swatch dash" style="border-top-color:var(--amber)"></span>Parcel path (LCL → moist adiabat)</div><div class="item">🎌 Wind barb: pennant=50kt, full barb=10kt, half barb=5kt, circle=calm</div><div class="item"><span style="width:12px;height:12px;background:#e0554a;opacity:.5;display:inline-block;border-radius:2px;"></span> CAPE (positive area)</div><div class="item"><span style="width:12px;height:12px;background:#4a90c4;opacity:.5;display:inline-block;border-radius:2px;"></span> CIN (negative area)</div></div>
+    <div class="legend" id="legend"></div>
   </div>
   </div>
 
