@@ -270,14 +270,6 @@
 
   <div id="statHoverTip" class="stat-hover-tip"></div>
 
-  <div id="infoModalOverlay">
-    <div id="infoModalBox">
-      <button id="infoModalPdf" title="Download as PDF">⬇</button>
-      <button id="infoModalClose" title="Close">✕</button>
-      <div id="infoModalContent"></div>
-    </div>
-  </div>
-
   <div id="taModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
       z-index:160;align-items:center;justify-content:center;padding:24px;">
     <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
@@ -348,13 +340,13 @@
   <header>
     <div class="header-top">
       <div class="title-block">
-        <div class="eyebrow">S2/RR4 Radiosonde Telemetry</div>
+        <div class="eyebrow">Amateur Radiosonde Telemetry</div>
         <h1><a href="https://sparv.io/" target="_blank" rel="noopener" class="title-link">Stüve Diagram from S2/RR4 Sonde Data</a></h1>
-        <p id="subtitle">Please load Radiosonde ascent data … · v63 (2026-08-02)</p>
+        <p id="subtitle">Please load Radiosonde ascent data … · v66 (2026-08-02)</p>
         <p style="margin:2px 0 0;font-size:12px;color:var(--text-dim);font-family:var(--mono);
           display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span id="launchLoc"></span>
-          <span id="headerVersionStamp" style="visibility:hidden;">· v63 (2026-08-02)</span>
+          <span id="headerVersionStamp" style="visibility:hidden;">· v66 (2026-08-02)</span>
         </p>
       </div>
       <img class="header-logo" alt="Wicki Partners Ballonteam"
@@ -637,7 +629,7 @@
         <div style="position:relative;">
           <div id="mapContainer" style="width:100%;border-radius:6px;overflow:hidden;background:var(--panel);"></div>
           <canvas id="mapFallbackCanvas" style="display:none;width:100%;"></canvas>
-          <canvas id="mapCursorOverlay" style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
+          <canvas id="mapCursorOverlay" style="position:absolute;top:0;left:0;pointer-events:none;z-index:1000;"></canvas>
         </div>
         <div id="mapFallbackNote" style="display:none;font-size:9.5px;color:var(--text-dim);
           font-family:var(--mono);margin-top:6px;">Map tiles unavailable (offline or blocked by network) — showing flight path only.</div>
@@ -661,6 +653,14 @@
     Reverse-geocoding the launch location and the map's street tiles also need an internet connection;
     if blocked, coordinates and a schematic flight-path plot are still shown instead.
   </footer>
+</div>
+
+<div id="infoModalOverlay">
+  <div id="infoModalBox">
+    <button id="infoModalPdf" title="Download as PDF">⬇</button>
+    <button id="infoModalClose" title="Close">✕</button>
+    <div id="infoModalContent"></div>
+  </div>
 </div>
 
 <script>
@@ -3376,6 +3376,11 @@ canvas.addEventListener('mousemove', (e)=>{
   if(PLOT){
     const dotX = PLOT.xScale(pt[3]), dotY = PLOT.yScale(yOf(pt[2]));
     drawChartCursorDot(dotX, dotY);
+    const dewX = PLOT.xScale(pt[5]);
+    if(dewX >= PLOT.pad.left && dewX <= PLOT.pad.left+PLOT.plotW){
+      const c0 = document.getElementById('chartCursorOverlay');
+      paintSecondaryMarker(c0.getContext('2d'), dewX, dotY, 5);
+    }
     if(state.showThetaE){
       const teX = PLOT.xScale(thetaE(pt[3], pt[5], pt[2]));
       if(teX >= PLOT.pad.left && teX <= PLOT.pad.left+PLOT.plotW){
@@ -3873,10 +3878,16 @@ document.getElementById('mapExpandBtn').addEventListener('click', ()=>{
     // from Google Earth's own "Open file" / import option (or Earth Pro).
     let kml = '<?xml version="1.0" encoding="UTF-8"?>\\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document>' +
       '<Style id="path"><LineStyle><color>ff3a55e0</color><width>3</width></LineStyle></Style>' +
+      '<Style id="burst"><IconStyle><scale>1.3</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/star.png</href></Icon></IconStyle></Style>' +
       '<Placemark><name>Flight path</name><styleUrl>#path</styleUrl><LineString><altitudeMode>absolute</altitudeMode><coordinates>';
     kml += trail.map(t=>t[1]+','+t[0]+','+t[2]).join(' ');
     kml += '</coordinates></LineString></Placemark>';
     kml += '<Placemark><name>Launch</name><Point><coordinates>'+trail[0][1]+','+trail[0][0]+','+trail[0][2]+'</coordinates></Point></Placemark>';
+    let topIdx = 0;
+    for(let i=1;i<trail.length;i++){ if(trail[i][2] > trail[topIdx][2]) topIdx = i; }
+    const topPt = trail[topIdx];
+    kml += '<Placemark><name>Highest point (burst) — '+Math.round(topPt[2])+' m MSL</name><styleUrl>#burst</styleUrl>' +
+      '<Point><altitudeMode>absolute</altitudeMode><coordinates>'+topPt[1]+','+topPt[0]+','+topPt[2]+'</coordinates></Point></Placemark>';
     kml += '<Placemark><name>Last position</name><Point><coordinates>'+trail[trail.length-1][1]+','+trail[trail.length-1][0]+','+trail[trail.length-1][2]+'</coordinates></Point></Placemark>';
     kml += '</Document></kml>';
     const blob = new Blob([kml], {type:'application/vnd.google-earth.kml+xml'});
@@ -4061,16 +4072,12 @@ document.getElementById('sondehubSendBtn').addEventListener('click', async ()=>{
   statusEl.textContent = 'Sending telemetry…';
 
   try{
-    // Filter to GPS-tagged rows first (GPS fixes update less often than the
-    // other sensors in this data — thinning before filtering would throw
-    // away most of the budget on rows that get dropped anyway), then thin
-    // that to a reasonable point count — SondeHub is built for streaming
-    // telemetry at typical sonde rates (~1 point/sec), not necessarily a
-    // single bulk request with every 1 Hz sample from a full flight.
+    // Upload every GPS-tagged point (no thinning) — chunked into batches so
+    // a single oversized request doesn't risk rejection by the API.
     const gpsRows = state.rows.filter(r=>r[8]!=null && r[9]!=null);
-    const thinned = thinForShare(gpsRows, 600);
+    if(gpsRows.length === 0) throw new Error('No GPS-tagged points available to upload.');
     const nowIso = new Date().toISOString();
-    const packets = thinned.map(r=>{
+    const allPackets = gpsRows.map(r=>{
       const iso = r[0].replace(' ', 'T')+'Z';
       const pkt = {
         software_name: 'Stueve-Diagram-Tool',
@@ -4087,28 +4094,33 @@ document.getElementById('sondehubSendBtn').addEventListener('click', async ()=>{
       if(r[4]!=null) pkt.humidity = r[4];
       return pkt;
     });
-    if(packets.length === 0) throw new Error('No GPS-tagged points available to upload.');
 
-    const resp = await fetch(SONDEHUB_ENDPOINT, {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(packets)
-    });
-
-    if(resp.ok){
-      statusEl.style.color = '#3fae5a';
-      statusEl.innerHTML = `Uploaded ${packets.length} points. View it at
-        <a href="https://amateur.sondehub.org/#!mt=Mapnik&f=${encodeURIComponent(payloadCallsign)}"
-        target="_blank" rel="noopener" style="color:#3fae5a;">amateur.sondehub.org ↗</a>
-        (may take a minute to appear).`;
-    } else {
-      const text = await resp.text().catch(()=> '');
-      statusEl.style.color = '#e0554a';
-      statusEl.textContent = `SondeHub rejected the upload (HTTP ${resp.status}). ${text.slice(0,200)}`;
+    const CHUNK_SIZE = 500;
+    let uploaded = 0;
+    for(let i=0; i<allPackets.length; i+=CHUNK_SIZE){
+      const chunk = allPackets.slice(i, i+CHUNK_SIZE);
+      statusEl.style.color = 'var(--text-dim)';
+      statusEl.textContent = `Sending points ${i+1}–${i+chunk.length} of ${allPackets.length}…`;
+      const resp = await fetch(SONDEHUB_ENDPOINT, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(chunk)
+      });
+      if(!resp.ok){
+        const text = await resp.text().catch(()=> '');
+        throw new Error(`HTTP ${resp.status} after uploading ${uploaded} of ${allPackets.length} points. ${text.slice(0,200)}`);
+      }
+      uploaded += chunk.length;
     }
+
+    statusEl.style.color = '#3fae5a';
+    statusEl.innerHTML = `Uploaded all ${uploaded} GPS-tagged points. View it at
+      <a href="https://amateur.sondehub.org/#!mt=Mapnik&f=${encodeURIComponent(payloadCallsign)}"
+      target="_blank" rel="noopener" style="color:#3fae5a;">amateur.sondehub.org ↗</a>
+      (may take a minute to appear).`;
   }catch(err){
     statusEl.style.color = '#e0554a';
-    statusEl.textContent = `Upload failed — likely blocked by the browser (CORS) or a network issue: ${err.message}`;
+    statusEl.textContent = `Upload failed — likely blocked by the browser (CORS), rejected by the API, or a network issue: ${err.message}`;
   }
   sendBtn.disabled = false;
   sendBtn.textContent = 'Upload';
