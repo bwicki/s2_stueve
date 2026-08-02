@@ -1,11 +1,11 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde (v54)
+# Stüve Diagram Tool — S2/RR4 Radiosonde (v58)
 
 A self-contained, single-file web app for visualizing radiosonde ascent data
 (Stüve diagram, Emagram, or Skew-T) from the S2/RR4 system. No installation,
 no server, no build step — open the HTML file in a browser, or host it as a
 static page (e.g. GitHub Pages).
 
-**Live version:** https://bwicki.github.io/s2_stueve/
+**Live version:** https://sparv.io/ · this repository
 
 > The version number in this title matches the "· vNN (date)" stamp shown
 > next to the launch location in the app's own header — check that stamp
@@ -20,24 +20,32 @@ static page (e.g. GitHub Pages).
 - Plots temperature, dew point, and Theta-E against pressure/height on a
   Stüve, Emagram, or Skew-T background grid, with a configurable altitude
   unit (m AMSL, m AGL, ft, or Flight Level) shown on its own axis column.
-  When using Flight Level, altitudes below the (general default) transition
-  altitude also show the equivalent in feet, since FL isn't meaningful down
-  there in real aviation use
-- Hovering the chart shows a red dot marking exactly which point the
-  tooltip's numbers belong to, plus the tooltip itself — anywhere over the
-  chart, not just directly on a curve, and in the currently selected
-  altitude unit. The hodograph, rise-speed, and Theta-E panels have the
-  same kind of hover tooltip
+  Switching to Flight Level asks you to confirm a transition altitude
+  (pre-filled with an estimate based on the launch site's elevation, or
+  5000 ft) — below that altitude, everything is shown in plain feet instead
+  of a flight level, matching real aviation practice. This can be
+  re-adjusted any time via the small "TA: ... ft (edit)" link that appears
+  under the altitude unit selector
+- Hovering the main chart shows a prominent red crosshair marker exactly
+  where the tooltip's numbers come from — and the same height is
+  simultaneously marked on the wind-speed curve, the nearest wind barb, and
+  (smaller) on the hodograph, rise-speed, Theta-E, and flight-path map
+  panels, so it's easy to see how one altitude shows up across every view
+  at once. Hovering any of those side panels shows its own tooltip too, in
+  the currently selected altitude unit
 - Shades inversions, isothermal layers, and cloud layers continuously by
   relative humidity (configurable threshold, e.g. "shade from 70% RH")
 - Marks LCL, LFC, the freezing level, and the tropopause directly on the
   diagram, in addition to the parcel path and CAPE/CIN shading
-- Computes a full set of sounding diagnostics: LCL, LFC, CAPE, CIN, DCAPE,
-  precipitable water, freezing level, tropopause height, 0–6 km bulk wind
-  shear (plus the altitude band of the sharpest local shear), a K-Index-based
-  thunderstorm-likelihood estimate, and an estimated cloud cover — shown both
-  as a percentage and as the matching METAR abbreviation (SKC/FEW/SCT/BKN/OVC)
-  with its octas symbol
+- Computes a full set of sounding diagnostics — LCL, LFC, CAPE, the Lifted
+  Index, CIN, DCAPE, precipitable water, freezing level, tropopause height,
+  thunderstorm likelihood (K-Index), estimated cloud cover (with its METAR
+  abbreviation and octas symbol), 0–6 km bulk wind shear, inversions, and
+  isothermal layers. **Every one of these 14 fields has a small "i" icon**:
+  hovering it shows a one-line explanation, and clicking opens a full
+  popup with the derivation, meaning, and interpretation of that value,
+  reference links to further reading, and a button to download that popup
+  as a PDF
 - Includes a plain-language "Analytical Comments" section with a simple
   traffic-light read (🟢🟡🔴) on rain risk and thunderstorm risk, each on
   its own line — also included in the CSV export (as comment lines) and the
@@ -61,6 +69,7 @@ static page (e.g. GitHub Pages).
 |---|---|
 | `index.html` | The tool itself. This is the only file needed to run it. |
 | `stueve-flights-worker.js` | Optional Cloudflare Worker script that enables full-resolution short share-links (see below). Not required for the tool to work. |
+| `LICENSE` | Custom usage license — see below. |
 
 ## Hosting it yourself
 
@@ -78,9 +87,11 @@ Click **"Load new CSV"** and select a `..._raw_flight_history.csv` export
 from the S2/RR4 ground station software. The tool auto-detects the sonde ID
 from the filename and trims the pre-launch ground-idle period automatically.
 Loading a new file (or clicking "Sample data") resets the display settings
-— diagram type, altitude unit, barb density, wind smoothing, Theta-E, and
-cloud-shading threshold — back to their standard defaults, so every flight
-starts from the same known view.
+— diagram type, altitude unit, transition altitude, barb density, wind
+smoothing, Theta-E, and cloud-shading threshold — back to their standard
+defaults, so every flight starts from the same known view (and, since
+transition altitude depends on the launch site, you'll be asked to confirm
+it again for each new flight).
 
 ## Default view settings
 
@@ -143,27 +154,41 @@ printed page if one hasn't been created yet in that session.
   virtual-temperature correction. LFC: first level at/above the LCL where
   the parcel is warmer than the environment. DCAPE: descent from the
   minimum-Theta-E level in the lowest 400 hPa, following the standard
-  simplified approach (no entrainment). Precipitable water: column integral
-  of the dewpoint-derived mixing ratio.
+  simplified approach (no entrainment). Lifted Index: Galway (1956).
+  Precipitable water: column integral of the dewpoint-derived mixing ratio.
 - Flight Level is computed from true (geometric) altitude, not from a
-  pressure-altitude/QNE conversion. The transition-altitude threshold used
-  to trigger the "below TA" feet note is a single general default (5000 ft),
-  not a lookup for the specific launch site's actual airspace.
+  pressure-altitude/QNE conversion. The transition altitude used to decide
+  the FL/ft cutover is whatever you confirm in the popup — the pre-filled
+  suggestion is a rough estimate from the launch site's elevation (higher
+  terrain → higher suggested value), **not** a lookup of the actual
+  published airspace/AIP boundaries, which vary by TMA/CTR and require the
+  current AIP to confirm precisely.
 - Only the ascent phase is analyzed (automatically detected up to the
   altitude maximum); descent is only used for the flight-path map.
 - The K-Index-based thunderstorm likelihood, the cloud-cover/METAR
   estimate, and the Analytical Comments traffic-light read are all rough,
   automated estimates from a single vertical profile — useful as a quick
-  indicator, not a substitute for an official forecast.
+  indicator, not a substitute for an official forecast. Each Flight
+  Analytics field's info popup documents its own derivation, meaning, and
+  standard interpretation ranges in more depth, with links to further
+  reading (mainly the American Meteorological Society's Glossary of
+  Meteorology and the Storm Prediction Center's mesoanalysis documentation).
 - The altitude axis extrapolates a short distance above the highest data
   point (using the measured temperature there and the barometric formula)
   purely so the profile doesn't run right up against the top edge of the
   chart — it's a display margin, not an extra measurement.
 
-## License / attribution
+## License
+
+See `LICENSE` in this repository: use of the app is permitted, but
+modification, redistribution, or publishing derivative versions requires
+the author's prior written permission and must retain attribution.
+
+## Third-party attribution
 
 Includes two small third-party open-source libraries, embedded directly in
 `index.html`: [Leaflet](https://leafletjs.com/) (BSD-2-Clause) for the map,
 and [qrcodejs](https://github.com/davidshimjs/qrcodejs) (MIT) for the QR
 code. Map tiles © [OpenStreetMap](https://www.openstreetmap.org/copyright)
-contributors.
+contributors. These remain under their own original licenses regardless of
+this repository's own LICENSE file.
