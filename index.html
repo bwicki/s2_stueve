@@ -124,10 +124,9 @@
     line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
     font-family:var(--mono);padding:0;}
   .stat-info-btn:hover{border-color:var(--amber);color:var(--amber);}
-  .stat-hover-tip{display:none;position:absolute;z-index:30;top:26px;right:4px;width:220px;
+  .stat-hover-tip{display:none;position:fixed;z-index:30;width:220px;
     background:rgba(10,14,20,.97);border:1px solid var(--amber);border-radius:6px;padding:9px 11px;
     font-family:var(--mono);font-size:10.5px;color:#e3e9f2;line-height:1.5;box-shadow:0 6px 20px rgba(0,0,0,.4);}
-  .stat:hover .stat-hover-tip, .stat-info-btn:hover ~ .stat-hover-tip{display:block;}
   .stat-hover-tip .more-link{color:var(--amber);cursor:pointer;font-weight:600;display:inline-block;margin-top:6px;}
   .stat-hover-tip .more-link:hover{text-decoration:underline;}
 
@@ -222,7 +221,7 @@
     #panelsRow > div{min-width:0 !important;flex:none !important;}
     #hodoCard > div:first-child, #riseCard > div:first-child,
     #thetaECard > div:first-child, #mapCard > div:first-child{font-size:7.5px;margin-bottom:4px !important;}
-    .panel-export-btn, #mapExportBtn, #mapExpandBtn, #exportPngBtn, #windPanelHandle, #printModalOverlay, #welcomeOverlay, #chartCursorOverlay, #hodoCursorOverlay, #riseCursorOverlay, #thetaECursorOverlay, #mapCursorOverlay, .stat-info-btn, .stat-hover-tip, #infoModalOverlay, #taModalOverlay, #taEditLink{display:none !important;}
+    .panel-export-btn, #mapExportBtn, #mapExpandBtn, #exportPngBtn, #windPanelHandle, #printModalOverlay, #welcomeOverlay, #chartCursorOverlay, #hodoCursorOverlay, #riseCursorOverlay, #thetaECursorOverlay, #mapCursorOverlay, .stat-info-btn, .stat-hover-tip, #statHoverTip, #infoModalOverlay, #taModalOverlay, #taEditLink, #sondehubModalOverlay{display:none !important;}
     html.print-no-panels #panelsRow{display:none !important;}
     .legend{gap:2px 8px;padding:5px 2px 1px;font-size:7px;line-height:1.15;}
     .swatch{width:10px;border-top-width:1.6px;}
@@ -265,6 +264,8 @@
     </div>
   </div>
 
+  <div id="statHoverTip" class="stat-hover-tip"></div>
+
   <div id="infoModalOverlay">
     <div id="infoModalBox">
       <button id="infoModalPdf" title="Download as PDF">⬇</button>
@@ -301,16 +302,55 @@
     </div>
   </div>
 
+  <div id="sondehubModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+      z-index:170;align-items:center;justify-content:center;padding:24px;">
+    <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+        padding:22px 26px;font-family:var(--mono);color:var(--text);max-width:420px;
+        box-shadow:0 12px 40px rgba(0,0,0,.4);">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;">Upload to SondeHub (Amateur)</div>
+      <div id="sondehubIntro" style="font-size:11.5px;color:var(--text-dim);line-height:1.55;margin-bottom:14px;">
+        This sends this flight's ascent telemetry to <a href="https://amateur.sondehub.org/" target="_blank"
+        rel="noopener" style="color:var(--amber);">amateur.sondehub.org</a>, where it becomes
+        <b>publicly visible</b> on their live map. SondeHub's own tools are built for near-real-time
+        tracking; uploading a completed flight after the fact works technically but isn't the
+        typical use case — please make sure that's okay before proceeding. The upload uses SondeHub's
+        published API directly from this page; if your browser or network blocks the request
+        (a real possibility, since this isn't the exact workflow SondeHub was designed for), you'll
+        see an error below instead of a silent failure.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+        <div>
+          <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px;">Your callsign / identifier (required by SondeHub):</label>
+          <input id="sondehubCallsign" type="text" placeholder="e.g. HB9ABC or your team name" maxlength="40"
+            style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);color:var(--text);
+            font-family:var(--mono);font-size:12px;padding:6px 8px;border-radius:5px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px;">Payload callsign (shown on the map):</label>
+          <input id="sondehubPayload" type="text" maxlength="40"
+            style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);color:var(--text);
+            font-family:var(--mono);font-size:12px;padding:6px 8px;border-radius:5px;">
+        </div>
+      </div>
+      <div id="sondehubStatus" style="font-size:11px;line-height:1.5;margin-bottom:12px;display:none;"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="reset-btn" id="sondehubCancelBtn">Cancel</button>
+        <button class="reset-btn" id="sondehubSendBtn" style="background:var(--amber);
+          border-color:var(--amber);color:#1a1200;font-weight:700;">Upload</button>
+      </div>
+    </div>
+  </div>
+
   <header>
     <div class="header-top">
       <div class="title-block">
         <div class="eyebrow">S2/RR4 Radiosonde Telemetry</div>
         <h1><a href="https://sparv.io/" target="_blank" rel="noopener" class="title-link">Stüve Diagram from S2/RR4 Sonde Data</a></h1>
-        <p id="subtitle">Radiosonde ascent — loading…</p>
+        <p id="subtitle">Please load Radiosonde ascent data … · v61 (2026-08-02)</p>
         <p style="margin:2px 0 0;font-size:12px;color:var(--text-dim);font-family:var(--mono);
           display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span id="launchLoc"></span>
-          <span>· v58 (2026-08-02)</span>
+          <span>· v61 (2026-08-02)</span>
         </p>
       </div>
       <img class="header-logo" alt="Wicki Partners Ballonteam"
@@ -338,6 +378,7 @@
           <input type="file" id="compareInput" accept=".csv">
         </label>
         <div id="compareList" style="display:none;flex-direction:column;gap:3px;"></div>
+        <button class="reset-btn" id="sondehubBtn" title="Upload this flight's telemetry to sondehub.org">☁ Upload to SondeHub</button>
         <div style="flex:1;"></div>
         <button class="reset-btn" id="resetBtn" style="background:var(--amber);border-color:var(--amber);
           color:#1a1200;font-weight:700;">▶ Sample data</button>
@@ -418,7 +459,9 @@
   <div class="stat-strip" id="statStrip"></div>
   <div class="section-title">Flight Analytics</div>
   <div class="stat-strip" id="thermoStrip" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr));"></div>
-  <div class="section-title">Analytical Comments</div>
+  <div class="section-title" style="display:flex;align-items:center;gap:6px;">Analytical Comments
+    <button class="stat-info-btn" data-info-key="analyticalComments" style="position:static;"></button>
+  </div>
   <div id="analyticalComments" style="background:var(--panel);border:1px solid var(--line);border-radius:8px;
       padding:12px 16px;margin-bottom:18px;font-family:var(--mono);font-size:12px;
       display:flex;flex-direction:column;gap:8px;"></div>
@@ -444,16 +487,16 @@
       </div>
       <div style="display:flex;flex-direction:column;gap:3px;padding-right:16px;margin-right:2px;border-right:1px solid var(--line);">
         <label style="font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.06em;">ALTITUDE UNIT</label>
+        <div id="taEditLink" style="display:none;font-size:9.5px;color:var(--text-dim);cursor:pointer;
+          white-space:nowrap;">TA: <span id="taEditLinkValue"></span> ft <span style="text-decoration:underline;">(edit)</span></div>
         <select id="altitudeUnitSelect" style="background:var(--panel-2);border:1px solid var(--line);
           color:var(--text);font-family:var(--mono);font-size:12px;padding:0 14px;height:36px;
           box-sizing:border-box;border-radius:6px;cursor:pointer;">
-          <option value="amsl">m AMSL</option>
+          <option value="amsl" selected>m AMSL</option>
           <option value="agl">m AGL</option>
           <option value="ft">ft</option>
-          <option value="fl" selected>FL</option>
+          <option value="fl">FL</option>
         </select>
-        <div id="taEditLink" style="display:none;font-size:9.5px;color:var(--text-dim);cursor:pointer;
-          white-space:nowrap;">TA: <span id="taEditLinkValue"></span> ft <span style="text-decoration:underline;">(edit)</span></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:3px;padding-right:16px;margin-right:2px;border-right:1px solid var(--line);">
         <label style="font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.06em;">BARB DENSITY</label>
@@ -661,7 +704,7 @@ const RAW_FULL_TRAIL = [[47.1757,7.402085,416.0],[47.175702,7.402092,416.0],[47.
 const state = { rows: EMBEDDED_DATA, isDefault: true, source: 'Sample data (2026-07-25)', sondeId: '17354',
   compareFlights: [], windSmoothed: true, barbIntervalSec: 30, scrubIdx: null, diagramType: 'stuve',
   viewMinPct: 0, viewMaxPct: 1000, fullTrail: RAW_FULL_TRAIL, showThetaE: false, cloudThreshold: 70,
-  speedPanelWidth: null, altitudeUnit: 'fl', windDisplayMode: 'barb', printWithPanels: true,
+  speedPanelWidth: null, altitudeUnit: 'amsl', windDisplayMode: 'barb', printWithPanels: true,
   transitionAltFt: null, transitionAltConfirmed: false };
 const COMPARE_COLORS = [
   {temp:'#d1770f', dew:'#3fae7a'},
@@ -1465,7 +1508,7 @@ function renderThermo(rows){
     ['freezeLevel', 'Freezing level', t.freezeAlt!=null ? formatAltitude(t.freezeAlt, groundAltM) : 'not in sounding'],
     ['tropopause', 'Tropopause', t.tropoAlt!=null ? formatAltitude(t.tropoAlt, groundAltM) : 'not reached'],
     ['thunderstorm', 'Thunderstorm chance (est.)', stormPct!=null ? stormPct+'% (K='+Math.round(k)+')' : 'sounding too shallow'],
-    ['cloudCover', 'Cloud cover (est.)', `${cloudPct}% ${octasToMetar(cloudPctToOctas(cloudPct))}${octasSvgIcon(cloudPctToOctas(cloudPct))}`],
+    ['cloudCover', 'Cloud cover (est.)', `${cloudPct}% ${octasToMetar(cloudPctToOctas(cloudPct))} · ${cloudPctToOctas(cloudPct)}/8 octas${octasSvgIcon(cloudPctToOctas(cloudPct))}`],
     ['shear', '0–6 km bulk shear', shearKt!=null ? Math.round(shearKt)+' kt' : 'not enough wind data'],
     ['inversions', 'Inversions', formatLayers(invLayers)],
     ['isothermal', 'Isothermal layers', formatLayers(isoLayers)],
@@ -1474,16 +1517,13 @@ function renderThermo(rows){
     const info = FIELD_INFO[key];
     return `<div class="stat">
       <div class="k">${k}</div><div class="v">${v}</div>
-      ${info ? `
-      <button class="stat-info-btn" data-info-key="${key}">i</button>
-      <div class="stat-hover-tip">
-        ${info.hover}
-        <div class="more-link" data-info-key="${key}">More info →</div>
-      </div>` : ''}
+      ${info ? `<button class="stat-info-btn" data-info-key="${key}">i</button>` : ''}
     </div>`;
   }).join('');
 
   renderAnalyticalComments(rows, ctx);
+  LAST_ANALYTICS_CTX = ctx;
+  LAST_ANALYTICS_ROWS = rows;
 }
 
 // ---------- Flight Analytics field explanations ----------
@@ -1867,6 +1907,36 @@ isothermal: {
     day sitting above the fresh boundary layer).</p>`,
   links: [
     {label:'AMS Glossary — Isothermal layer', url:'https://glossary.ametsoc.org/wiki/Isothermal_layer'},
+  ],
+},
+
+analyticalComments: {
+  label: 'Analytical Comments',
+  hover: 'A plain-language traffic-light summary of rain risk and thunderstorm risk, derived from the fields above.',
+  derivation: `<p>This section combines several of the fields above into two separate,
+    automated qualitative assessments:</p>
+    <p><b>Rain risk</b> uses estimated cloud cover and precipitable water:
+    🔴 high if cloud cover ≥ 85% and PW ≥ 30 mm; 🟡 moderate if cloud cover ≥ 50%
+    or PW ≥ 20 mm; 🟢 low otherwise.</p>
+    <p><b>Thunderstorm risk</b> uses the K-Index-derived probability and CAPE
+    (with a DCAPE note added when relevant): 🔴 high if the K-Index probability
+    is ≥ 60% or CAPE ≥ 1000 J/kg; 🟡 moderate if ≥ 30% or CAPE ≥ 300 J/kg;
+    🟢 low otherwise. If DCAPE ≥ 800 J/kg, a note about downdraft/gust potential
+    is appended.</p>`,
+  meaning: `<p>Rain risk here specifically means general/stratiform precipitation
+    potential — driven by how much moisture is in the column and how saturated
+    it already is — which is a different physical process from thunderstorm
+    risk, which depends on instability and lift (CAPE, K-Index) rather than
+    moisture alone. A sounding can show high rain risk with low thunderstorm
+    risk (a moist, stable, overcast airmass) or the reverse (a dry, unstable
+    airmass where storms are possible but only where triggered).</p>`,
+  interpretation: `<p>Treat both indicators as a fast, single-sounding sanity check —
+    exactly the kind of first read a forecaster does before digging into the
+    individual numbers — not a substitute for an actual forecast, which would
+    also weigh model guidance, satellite imagery, and the wider synoptic
+    situation.</p>`,
+  links: [
+    {label:'AMS Glossary — Airmass thunderstorm', url:'https://glossary.ametsoc.org/wiki/Airmass_thunderstorm'},
   ],
 },
 
@@ -3139,6 +3209,8 @@ let HODO_PLOT = null;
 let MINI_PLOTS = {};
 let MAP_TRAIL = null;
 let MAP_FALLBACK_PROJECT = null;
+let LAST_ANALYTICS_CTX = null;
+let LAST_ANALYTICS_ROWS = null;
 
 const hodoTooltip = document.getElementById('hodoTooltip');
 document.getElementById('hodoCanvas').addEventListener('mousemove', (e)=>{
@@ -3256,10 +3328,18 @@ canvas.addEventListener('mousemove', (e)=>{
     <div class="row"><span class="lbl">Dew point</span><span>${pt[5].toFixed(1)} °C</span></div>
     <div class="row"><span class="lbl">RH</span><span>${pt[4].toFixed(0)} %</span></div>
     ${pt[6]!=null && pt[7]!=null ? `<div class="row"><span class="lbl">Wind</span><span>${msToKt(pt[6]).toFixed(0)} kt / ${windFromDeg(pt[7]).toFixed(0)}°</span></div>` : ''}
+    ${state.showThetaE ? `<div class="row"><span class="lbl">Theta-E</span><span>${thetaE(pt[3], pt[5], pt[2]).toFixed(0)} °C-eq</span></div>` : ''}
   `;
   if(PLOT){
     const dotX = PLOT.xScale(pt[3]), dotY = PLOT.yScale(yOf(pt[2]));
     drawChartCursorDot(dotX, dotY);
+    if(state.showThetaE){
+      const teX = PLOT.xScale(thetaE(pt[3], pt[5], pt[2]));
+      if(teX >= PLOT.pad.left && teX <= PLOT.pad.left+PLOT.plotW){
+        const c = document.getElementById('chartCursorOverlay');
+        paintSecondaryMarker(c.getContext('2d'), teX, dotY, 5);
+      }
+    }
     highlightCrossPanels(pt);
   }
 });
@@ -3306,6 +3386,17 @@ function paintSecondaryMarker(octx, x, y, r){
   octx.beginPath();
   octx.arc(x, y, r*2, 0, Math.PI*2);
   octx.fill();
+
+  const tickInner = r+2, tickOuter = r+6;
+  octx.strokeStyle = 'rgba(224,57,43,0.85)';
+  octx.lineWidth = 1.1;
+  octx.beginPath();
+  octx.moveTo(x-tickOuter,y); octx.lineTo(x-tickInner,y);
+  octx.moveTo(x+tickInner,y); octx.lineTo(x+tickOuter,y);
+  octx.moveTo(x,y-tickOuter); octx.lineTo(x,y-tickInner);
+  octx.moveTo(x,y+tickInner); octx.lineTo(x,y+tickOuter);
+  octx.stroke();
+
   octx.fillStyle = '#ff3c28';
   octx.strokeStyle = '#ffffff';
   octx.lineWidth = 1.4;
@@ -3691,6 +3782,14 @@ document.getElementById('mapExpandBtn').addEventListener('click', ()=>{
   if(trail.length < 2){ alert('No GPS track available.'); return; }
   const title = `Flight path — Sonde ${state.sondeId||''} — ${state.rows[0][0]||''}`;
   const trailJson = JSON.stringify(trail);
+
+  const lats = trail.map(t=>t[0]), lons = trail.map(t=>t[1]);
+  const latMin=Math.min(...lats), latMax=Math.max(...lats), lonMin=Math.min(...lons), lonMax=Math.max(...lons);
+  const centerLat = (latMin+latMax)/2, centerLon = (lonMin+lonMax)/2;
+  const spanDeg = Math.max(latMax-latMin, lonMax-lonMin, 0.001);
+  const osmZoom = Math.max(3, Math.min(16, Math.round(Math.log2(360/spanDeg))));
+  const osmUrl = `https://www.openstreetmap.org/#map=${osmZoom}/${centerLat.toFixed(5)}/${centerLon.toFixed(5)}`;
+
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>${title.replace(/</g,'')}</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -3698,16 +3797,53 @@ document.getElementById('mapExpandBtn').addEventListener('click', ()=>{
 <style>
   html,body{margin:0;height:100%;background:#f4f1ea;font-family:-apple-system,'IBM Plex Mono',monospace;}
   #map{position:absolute;top:36px;left:0;right:0;bottom:0;}
-  #hdr{height:36px;display:flex;align-items:center;padding:0 14px;font-size:13px;color:#2a2419;
+  #hdr{height:36px;display:flex;align-items:center;gap:10px;padding:0 14px;font-size:12.5px;color:#2a2419;
     border-bottom:1px solid #ddd6c5;box-sizing:border-box;}
+  #hdr .title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #hdr button{font-family:inherit;font-size:11.5px;padding:5px 10px;border-radius:5px;border:1px solid #ccc;
+    background:#fff;cursor:pointer;color:#2a2419;white-space:nowrap;}
+  #hdr button:hover{border-color:#e0a83f;color:#e0a83f;}
   #fallback{position:absolute;top:36px;left:0;right:0;bottom:0;}
 </style></head>
 <body>
-  <div id="hdr">${title.replace(/</g,'')}</div>
+  <div id="hdr">
+    <span class="title">${title.replace(/</g,'')}</span>
+    <button id="osmBtn">Open in OSM ↗</button>
+    <button id="geBtn">Open in Google Earth ↗</button>
+  </div>
   <div id="map"></div>
   <canvas id="fallback" style="display:none;"></canvas>
 <script>
   const trail = ${trailJson};
+
+  document.getElementById('osmBtn').addEventListener('click', ()=>{
+    // OSM's web viewer has no URL format for an arbitrary custom track —
+    // this centers the map on the flight instead, as the closest
+    // equivalent it actually supports.
+    window.open('${osmUrl}', '_blank');
+  });
+  document.getElementById('geBtn').addEventListener('click', ()=>{
+    // Google Earth Web also has no URL format for loading an arbitrary
+    // inline track, so a KML file is generated and downloaded — open it
+    // from Google Earth's own "Open file" / import option (or Earth Pro).
+    let kml = '<?xml version="1.0" encoding="UTF-8"?>\\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document>' +
+      '<Style id="path"><LineStyle><color>ff3a55e0</color><width>3</width></LineStyle></Style>' +
+      '<Placemark><name>Flight path</name><styleUrl>#path</styleUrl><LineString><altitudeMode>absolute</altitudeMode><coordinates>';
+    kml += trail.map(t=>t[1]+','+t[0]+','+t[2]).join(' ');
+    kml += '</coordinates></LineString></Placemark>';
+    kml += '<Placemark><name>Launch</name><Point><coordinates>'+trail[0][1]+','+trail[0][0]+','+trail[0][2]+'</coordinates></Point></Placemark>';
+    kml += '<Placemark><name>Last position</name><Point><coordinates>'+trail[trail.length-1][1]+','+trail[trail.length-1][0]+','+trail[trail.length-1][2]+'</coordinates></Point></Placemark>';
+    kml += '</Document></kml>';
+    const blob = new Blob([kml], {type:'application/vnd.google-earth.kml+xml'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'flight-path.kml';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    window.open('https://earth.google.com/web/', '_blank');
+    alert('flight-path.kml has been downloaded. In the new Google Earth tab, use the menu (☰) → "Open" → "Import KML file from computer" and select it.');
+  });
+
   function drawFallback(){
     document.getElementById('map').style.display='none';
     const canvas = document.getElementById('fallback');
@@ -3841,6 +3977,92 @@ document.getElementById('taCancelBtn').addEventListener('click', ()=>{
   renderStats(state.rows);
   renderThermo(state.rows);
   draw(state.rows);
+});
+
+// ---------- SondeHub (Amateur) upload ----------
+// Uses the documented public API (api.v2.sondehub.org/amateur/telemetry).
+// This is a best-effort client-side integration: SondeHub's API was built
+// for near-real-time uploads from radiosonde_auto_rx-style receivers, and
+// there is no guarantee it accepts cross-origin requests directly from a
+// browser page like this one — if it's blocked, the error is shown rather
+// than failing silently.
+const SONDEHUB_ENDPOINT = 'https://api.v2.sondehub.org/amateur/telemetry';
+
+document.getElementById('sondehubBtn').addEventListener('click', ()=>{
+  if(!state.rows || state.rows.length < 2){ alert('No flight data loaded.'); return; }
+  document.getElementById('sondehubPayload').value = state.sondeId || 'UNKNOWN';
+  document.getElementById('sondehubStatus').style.display = 'none';
+  document.getElementById('sondehubModalOverlay').style.display = 'flex';
+});
+document.getElementById('sondehubCancelBtn').addEventListener('click', ()=>{
+  document.getElementById('sondehubModalOverlay').style.display = 'none';
+});
+
+document.getElementById('sondehubSendBtn').addEventListener('click', async ()=>{
+  const callsign = document.getElementById('sondehubCallsign').value.trim();
+  const payloadCallsign = document.getElementById('sondehubPayload').value.trim();
+  const statusEl = document.getElementById('sondehubStatus');
+  if(!callsign || !payloadCallsign){
+    statusEl.style.display = 'block';
+    statusEl.style.color = '#e0554a';
+    statusEl.textContent = 'Both fields are required by SondeHub.';
+    return;
+  }
+  const sendBtn = document.getElementById('sondehubSendBtn');
+  sendBtn.disabled = true;
+  sendBtn.textContent = 'Uploading…';
+  statusEl.style.display = 'block';
+  statusEl.style.color = 'var(--text-dim)';
+  statusEl.textContent = 'Sending telemetry…';
+
+  try{
+    // Thin to a reasonable point count — SondeHub is built for streaming
+    // telemetry at typical sonde rates (~1 point/sec), not necessarily a
+    // single bulk request with every 1 Hz sample from a full flight.
+    const thinned = thinForShare(state.rows, 600);
+    const nowIso = new Date().toISOString();
+    const packets = thinned.filter(r=>r[8]!=null && r[9]!=null).map(r=>{
+      const iso = r[0].replace(' ', 'T')+'Z';
+      const pkt = {
+        software_name: 'Stueve-Diagram-Tool',
+        software_version: '1.0',
+        uploader_callsign: callsign,
+        payload_callsign: payloadCallsign,
+        time_received: nowIso,
+        datetime: iso,
+        lat: r[8],
+        lon: r[9],
+        alt: r[1],
+      };
+      if(r[3]!=null) pkt.temp = r[3];
+      if(r[4]!=null) pkt.humidity = r[4];
+      return pkt;
+    });
+    if(packets.length === 0) throw new Error('No GPS-tagged points available to upload.');
+
+    const resp = await fetch(SONDEHUB_ENDPOINT, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(packets)
+    });
+
+    if(resp.ok){
+      statusEl.style.color = '#3fae5a';
+      statusEl.innerHTML = `Uploaded ${packets.length} points. View it at
+        <a href="https://amateur.sondehub.org/#!mt=Mapnik&f=${encodeURIComponent(payloadCallsign)}"
+        target="_blank" rel="noopener" style="color:#3fae5a;">amateur.sondehub.org ↗</a>
+        (may take a minute to appear).`;
+    } else {
+      const text = await resp.text().catch(()=> '');
+      statusEl.style.color = '#e0554a';
+      statusEl.textContent = `SondeHub rejected the upload (HTTP ${resp.status}). ${text.slice(0,200)}`;
+    }
+  }catch(err){
+    statusEl.style.color = '#e0554a';
+    statusEl.textContent = `Upload failed — likely blocked by the browser (CORS) or a network issue: ${err.message}`;
+  }
+  sendBtn.disabled = false;
+  sendBtn.textContent = 'Upload';
 });
 
 document.getElementById('windDisplayModeSelect').addEventListener('change', (e)=>{
@@ -4358,10 +4580,204 @@ document.getElementById('thermoStrip').addEventListener('click', (e)=>{
   openInfoModal(trigger.dataset.infoKey);
 });
 
+document.getElementById('thermoStrip').addEventListener('mouseover', (e)=>{
+  const btn = e.target.closest('.stat-info-btn');
+  if(!btn) return;
+  const info = FIELD_INFO[btn.dataset.infoKey];
+  if(!info) return;
+  const tip = document.getElementById('statHoverTip');
+  tip.innerHTML = `${info.hover}<div class="more-link" data-info-key="${btn.dataset.infoKey}">More info →</div>`;
+  const r = btn.getBoundingClientRect();
+  tip.style.display = 'block';
+  const tipW = 220;
+  let left = r.right - tipW;
+  left = Math.max(8, Math.min(left, window.innerWidth - tipW - 8));
+  tip.style.left = left+'px';
+  tip.style.top = (r.bottom + 6)+'px';
+});
+document.getElementById('thermoStrip').addEventListener('mouseout', (e)=>{
+  const btn = e.target.closest('.stat-info-btn');
+  if(!btn) return;
+  if(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('#statHoverTip')) return;
+  document.getElementById('statHoverTip').style.display = 'none';
+});
+document.getElementById('statHoverTip').addEventListener('click', (e)=>{
+  const trigger = e.target.closest('[data-info-key]');
+  if(!trigger) return;
+  document.getElementById('statHoverTip').style.display = 'none';
+  openInfoModal(trigger.dataset.infoKey);
+});
+
+document.querySelector('[data-info-key="analyticalComments"]').addEventListener('click', ()=>{
+  openInfoModal('analyticalComments');
+});
+document.querySelector('[data-info-key="analyticalComments"]').addEventListener('mouseenter', (e)=>{
+  const info = FIELD_INFO.analyticalComments;
+  const tip = document.getElementById('statHoverTip');
+  tip.innerHTML = `${info.hover}<div class="more-link" data-info-key="analyticalComments">More info →</div>`;
+  const r = e.target.getBoundingClientRect();
+  tip.style.display = 'block';
+  const tipW = 220;
+  let left = r.right - tipW;
+  left = Math.max(8, Math.min(left, window.innerWidth - tipW - 8));
+  tip.style.left = left+'px';
+  tip.style.top = (r.bottom + 6)+'px';
+});
+document.querySelector('[data-info-key="analyticalComments"]').addEventListener('mouseleave', (e)=>{
+  if(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('#statHoverTip')) return;
+  document.getElementById('statHoverTip').style.display = 'none';
+});
+
+// ---------- Dynamic "interpretation of the actual value" per field ----------
+// Each function receives the current analytics context and rows, and
+// returns an HTML string discussing this specific flight's computed value
+// against the standard ranges described in the static popup content above.
+const FIELD_ACTUAL = {
+  lcl: (ctx)=>{
+    const t = ctx.t;
+    return `<p>For this flight, the LCL works out to <b>${Math.round(t.lcl.p)} hPa</b>
+      (${formatAltitude(altitudeAtPressureSafe(ctx, t.lcl.p), ctx.groundAltM)}),
+      at a temperature of ${t.lcl.T.toFixed(1)} °C. ${
+      (t.lcl.p > (t.p0-150)) ?
+        'That is fairly close to the surface pressure, indicating a moist boundary layer and a low expected cloud base.' :
+        (t.lcl.p < (t.p0-350) ?
+          'That is well above the surface, indicating a fairly dry sub-cloud layer and a higher expected cloud base.' :
+          'That is a moderate distance above the surface — a fairly typical cloud-base height for this kind of profile.')
+      }</p>`;
+  },
+  lfc: (ctx)=>{
+    const t = ctx.t;
+    if(t.lfcP==null) return `<p>No LFC was found in this sounding — the profile as measured never
+      supports free convection, regardless of any lift applied to a surface parcel.</p>`;
+    const gap = t.lcl.p - t.lfcP;
+    return `<p>The LFC sits at <b>${Math.round(t.lfcP)} hPa</b>, ${gap<10?'essentially at the LCL':
+      gap<80?'a modest distance above the LCL':'well above the LCL'} (LCL: ${Math.round(t.lcl.p)} hPa).
+      ${gap<10 ? 'With little or no gap, there is effectively no capping inversion — convection could begin readily once the LCL is reached.' :
+        gap<80 ? 'This modest gap corresponds to the CIN of '+Math.round(t.cin)+' J/kg computed for this profile — a cap that daytime heating or modest lift could plausibly overcome.' :
+        'This large gap corresponds to the CIN of '+Math.round(t.cin)+' J/kg computed for this profile — a substantial cap that would need strong forcing to break.'}</p>`;
+  },
+  cape: (ctx)=>{
+    const c = ctx.t.cape;
+    const cat = c<300?'weak/marginal':c<1000?'moderate':c<2500?'strong':'extreme';
+    return `<p>This flight's surface-based CAPE is <b>${Math.round(c)} J/kg</b>, which falls in the
+      <b>${cat}</b> category by the standard ranges above. ${
+      c<50 ? 'This is close to zero — the profile is essentially stable for a surface-based parcel.' :
+      c<300 ? 'Only limited buoyant energy is available even if convection is triggered.' :
+      c<1000 ? 'A meaningful amount of energy is available; showers or thunderstorms, if triggered, could develop real updraft strength.' :
+      'A large amount of energy is available — if convection is triggered, it has the potential to become vigorous.'
+      }</p>`;
+  },
+  li: (ctx)=>{
+    const li = ctx.t.li;
+    if(li==null) return `<p>The sounding doesn't reach 500 hPa, so a Lifted Index couldn't be computed for this flight.</p>`;
+    const cat = li>0?'stable':li>-2?'marginally unstable':li>-6?'moderately unstable':'very unstable';
+    return `<p>This flight's Lifted Index is <b>${li>0?'+':''}${li.toFixed(1)} °C</b>, which falls in the
+      <b>${cat}</b> category by Galway's original ranges. ${
+      li>0 ? 'A surface parcel lifted to 500 hPa would end up colder than its environment there — this layer resists free convection.' :
+      'A surface parcel lifted to 500 hPa would end up warmer than its environment there, consistent with the CAPE value of '+Math.round(ctx.t.cape)+' J/kg computed for the same profile.'
+      }</p>`;
+  },
+  cin: (ctx)=>{
+    const cin = ctx.t.cin;
+    return `<p>CIN for this flight is <b>${Math.round(cin)} J/kg</b>. ${
+      cin<25 ? 'That is low enough to be overcome easily by ordinary daytime heating or weak lift.' :
+      cin<100 ? 'That is a moderate cap — noticeable, but plausibly breakable with typical daytime heating or a modest lifting mechanism.' :
+      'That is a substantial cap — this profile would likely need strong forcing (a front, strong heating, or orographic lift) to initiate convection at all.'
+      }</p>`;
+  },
+  dcape: (ctx)=>{
+    const d = ctx.dcape;
+    if(d==null) return `<p>DCAPE could not be computed for this profile (insufficient data in the lowest 400 hPa).</p>`;
+    return `<p>DCAPE for this flight is <b>${Math.round(d)} J/kg</b>. ${
+      d<400 ? 'That suggests comparatively limited downdraft potential from this profile.' :
+      d<800 ? 'That is a moderate value — some gusty outflow potential if a storm does form nearby.' :
+      'That is a high value — this profile favors strong, gusty downdrafts and outflow winds if a storm forms nearby.'
+      }</p>`;
+  },
+  pw: (ctx)=>{
+    const p = ctx.pw;
+    return `<p>Precipitable water for this column is <b>${p.toFixed(1)} mm</b>. ${
+      p<15 ? 'That is a fairly dry column overall, typical of cold or continental airmasses — the ceiling on possible rainfall from this airmass alone is low.' :
+      p<30 ? 'That is a moderate value, unremarkable for a temperate-latitude warm season airmass.' :
+      'That is a notably moist column — if strong lift or a very efficient rain process is also present, this level of PW supports heavy-rainfall potential.'
+      }</p>`;
+  },
+  freezeLevel: (ctx)=>{
+    const t = ctx.t;
+    if(t.freezeAlt==null) return `<p>No freezing level was found — the entire measured profile stayed at or above 0 °C.</p>`;
+    return `<p>The freezing level for this flight is at <b>${formatAltitude(t.freezeAlt, ctx.groundAltM)}</b>
+      (${Math.round(t.freezeAlt)} m MSL). ${
+      t.freezeAlt < 1500 ? 'That is quite low — any precipitation reaching the surface has a good chance of falling as snow even at modest elevations.' :
+      t.freezeAlt < 3000 ? 'That is a fairly typical mid-latitude value for a temperate-season sounding.' :
+      'That is a high freezing level, consistent with a warm, often subtropical or summertime airmass — precipitation is very likely to remain rain down to the surface.'
+      }</p>`;
+  },
+  tropopause: (ctx)=>{
+    const t = ctx.t;
+    if(t.tropoAlt==null) return `<p>The tropopause wasn't reached — the flight (or the lapse-rate criterion) ended before the profile satisfied the WMO definition.</p>`;
+    return `<p>The tropopause for this flight was found at <b>${formatAltitude(t.tropoAlt, ctx.groundAltM)}</b>
+      (${Math.round(t.tropoAlt)} m MSL, ${Math.round(t.tropoP)} hPa). ${
+      t.tropoAlt < 9500 ? 'That is on the low side for mid-latitudes, more typical of a polar or cold-season airmass.' :
+      t.tropoAlt < 12500 ? 'That sits in the typical mid-latitude range.' :
+      'That is on the high side for mid-latitudes, more typical of a warm, subtropical-influenced airmass.'
+      }</p>`;
+  },
+  thunderstorm: (ctx)=>{
+    if(ctx.stormPct==null) return `<p>The sounding doesn't reach 500 hPa, so the K-Index couldn't be computed for this flight.</p>`;
+    return `<p>This flight's K-Index is <b>${Math.round(ctx.k)}</b>, mapping to an estimated
+      <b>${ctx.stormPct}%</b> thunderstorm probability by George's original table — combined here with a
+      CAPE of ${Math.round(ctx.t.cape)} J/kg for the traffic-light read above.</p>`;
+  },
+  cloudCover: (ctx)=>{
+    const octas = cloudPctToOctas(ctx.cloudPct);
+    return `<p>The estimated cloud cover for this flight is <b>${ctx.cloudPct}%</b>, corresponding to
+      <b>${octas}/8 octas (${octasToMetar(octas)})</b>. Remember this is derived from the humidity
+      profile alone, not an actual cloud observation — treat it as a rough cross-check against the
+      continuous humidity shading on the main diagram.</p>`;
+  },
+  shear: (ctx)=>{
+    if(ctx.shearKt==null) return `<p>Not enough wind data was available in this flight to compute 0–6 km bulk shear.</p>`;
+    const s = ctx.shearKt;
+    const cat = s<20?'weak':s<35?'moderate':'strong';
+    return `<p>0–6 km bulk shear for this flight is <b>${Math.round(s)} kt</b>, in the <b>${cat}</b>
+      range. ${
+      s<20 ? 'Combined with the CAPE value of '+Math.round(ctx.t.cape)+' J/kg, any convection this profile supports would likely stay disorganized and short-lived.' :
+      s<35 ? 'This level of shear can support organized multicell clusters if enough instability is also present.' :
+      'This level of shear, if paired with sufficient CAPE ('+Math.round(ctx.t.cape)+' J/kg here), can support supercell organization.'
+      }</p>`;
+  },
+  inversions: (ctx, rows)=>{
+    const layers = detectInversions(rows);
+    if(layers.length===0) return `<p>No inversion layers were detected in this profile — temperature
+      decreased with height throughout (the normal tropospheric pattern).</p>`;
+    const alts = layers.map(l=>formatAltitude(altitudeAtPressure(rows,(l.p0+l.p1)/2), ctx.groundAltM));
+    return `<p>This flight measured <b>${layers.length}</b> inversion layer${layers.length>1?'s':''},
+      centered near ${alts.join(', ')}. Each one marks a level where vertical mixing is locally
+      suppressed — worth cross-checking against the freezing level and cloud layers on the main
+      diagram, since inversions often coincide with cloud tops or bases.</p>`;
+  },
+  isothermal: (ctx, rows)=>{
+    const layers = detectIsothermalLayers(rows);
+    if(layers.length===0) return `<p>No isothermal layers were detected in this profile.</p>`;
+    const alts = layers.map(l=>formatAltitude(altitudeAtPressure(rows,(l.p0+l.p1)/2), ctx.groundAltM));
+    return `<p>This flight measured <b>${layers.length}</b> isothermal layer${layers.length>1?'s':''},
+      centered near ${alts.join(', ')} — each a level of reduced (though not reversed) vertical
+      mixing.</p>`;
+  },
+  analyticalComments: (ctx)=>{
+    return `<p>See the color-coded lines in the Analytical Comments panel itself for this flight's
+      specific rain-risk and thunderstorm-risk read, generated from the values discussed above.</p>`;
+  },
+};
+// Small helper used defensively by a couple of the functions above.
+function altitudeAtPressureSafe(ctx, p){ return altitudeAtPressure(LAST_ANALYTICS_ROWS||[], p); }
+
 function openInfoModal(key){
   const info = FIELD_INFO[key];
   if(!info) return;
   const content = document.getElementById('infoModalContent');
+  const actualFn = FIELD_ACTUAL[key];
+  const actualHtml = (actualFn && LAST_ANALYTICS_CTX) ? actualFn(LAST_ANALYTICS_CTX, LAST_ANALYTICS_ROWS) : null;
   content.innerHTML = `
     <h2>${info.label}</h2>
     <h3>Derivation</h3>
@@ -4370,6 +4786,7 @@ function openInfoModal(key){
     ${info.meaning}
     <h3>Interpretation</h3>
     ${info.interpretation}
+    ${actualHtml ? `<h3>Interpretation of the actual value</h3>${actualHtml}` : ''}
     <h3>Further reading</h3>
     <ul class="im-links">
       ${info.links.map(l=>`<li><a href="${l.url}" target="_blank" rel="noopener">${l.label} ↗</a></li>`).join('')}
@@ -4447,7 +4864,7 @@ window.addEventListener('afterprint', ()=>{
 // every new flight starts from the same known baseline view.
 function resetConfigDefaults(){
   state.diagramType = 'stuve';
-  state.altitudeUnit = 'fl';
+  state.altitudeUnit = 'amsl';
   state.barbIntervalSec = 30;
   state.windSmoothed = true;
   state.windDisplayMode = 'barb';
@@ -4457,7 +4874,7 @@ function resetConfigDefaults(){
   state.transitionAltConfirmed = false;
 
   document.getElementById('diagramTypeSelect').value = 'stuve';
-  document.getElementById('altitudeUnitSelect').value = 'fl';
+  document.getElementById('altitudeUnitSelect').value = 'amsl';
   document.getElementById('barbDensitySelect').value = '30';
   document.getElementById('windDisplayModeSelect').value = 'barb';
   document.getElementById('cloudThreshInput').value = '70';

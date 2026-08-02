@@ -1,4 +1,10 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde (v58)
+# Stüve Diagram Tool — S2/RR4 Radiosonde (v61)
+
+> **License:** This project uses a custom, non-standard license (see
+> `LICENSE`). Using the app is permitted, but modifying, redistributing, or
+> publishing a derivative version is **not** permitted without the
+> copyright holder's prior written permission, and attribution must be
+> retained. This is not an open-source (MIT/Apache/GPL-style) license.
 
 A self-contained, single-file web app for visualizing radiosonde ascent data
 (Stüve diagram, Emagram, or Skew-T) from the S2/RR4 system. No installation,
@@ -28,11 +34,12 @@ static page (e.g. GitHub Pages).
   under the altitude unit selector
 - Hovering the main chart shows a prominent red crosshair marker exactly
   where the tooltip's numbers come from — and the same height is
-  simultaneously marked on the wind-speed curve, the nearest wind barb, and
-  (smaller) on the hodograph, rise-speed, Theta-E, and flight-path map
-  panels, so it's easy to see how one altitude shows up across every view
-  at once. Hovering any of those side panels shows its own tooltip too, in
-  the currently selected altitude unit
+  simultaneously marked on the wind-speed curve, the nearest wind barb, the
+  main chart's own Theta-E curve (if switched on, with its value added to
+  the tooltip), and — smaller — on the hodograph, rise-speed, Theta-E, and
+  flight-path map panels, so it's easy to see how one altitude shows up
+  across every view at once. Hovering any of those side panels shows its
+  own tooltip too, in the currently selected altitude unit
 - Shades inversions, isothermal layers, and cloud layers continuously by
   relative humidity (configurable threshold, e.g. "shade from 70% RH")
 - Marks LCL, LFC, the freezing level, and the tropopause directly on the
@@ -41,11 +48,13 @@ static page (e.g. GitHub Pages).
   Index, CIN, DCAPE, precipitable water, freezing level, tropopause height,
   thunderstorm likelihood (K-Index), estimated cloud cover (with its METAR
   abbreviation and octas symbol), 0–6 km bulk wind shear, inversions, and
-  isothermal layers. **Every one of these 14 fields has a small "i" icon**:
-  hovering it shows a one-line explanation, and clicking opens a full
-  popup with the derivation, meaning, and interpretation of that value,
-  reference links to further reading, and a button to download that popup
-  as a PDF
+  isothermal layers. **Every one of these 14 fields, plus the Analytical
+  Comments section itself, has a small "i" icon**: hovering it shows a
+  one-line explanation, and clicking opens a full popup with the
+  derivation, general meaning, standard interpretation ranges, **and a
+  dedicated section interpreting this specific flight's actual computed
+  value** against those ranges, plus reference links to further reading
+  and a button to download that popup as a PDF
 - Includes a plain-language "Analytical Comments" section with a simple
   traffic-light read (🟢🟡🔴) on rain risk and thunderstorm risk, each on
   its own line — also included in the CSV export (as comment lines) and the
@@ -62,6 +71,10 @@ static page (e.g. GitHub Pages).
   view, not just a dropdown), export CSV/PNG (each PNG stamped with the
   flight's date/time and peak altitude), print a one-page PDF summary (with
   or without the side panels, your choice), and share a link with a QR code
+- Can upload a flight's telemetry to [SondeHub Amateur](https://amateur.sondehub.org/)
+  ("☁ Upload to SondeHub", next to "Compare flight"), making it publicly
+  visible on their live map — see the notes below before using this
+- The bold title in the header links to [sparv.io](https://sparv.io/)
 
 ## Files in this repository
 
@@ -146,6 +159,15 @@ printed page if one hasn't been created yet in that session.
   saved flights are private to your device and browser.
 - Opening the flight-path map in a new window requires pop-ups to be
   allowed for this page.
+- "Upload to SondeHub" sends this flight's telemetry (position, altitude,
+  temperature, humidity) directly from your browser to SondeHub's public
+  API — nothing is uploaded until you explicitly click "Upload" in that
+  dialog, and the data becomes publicly visible on their map afterward.
+  SondeHub's API is built for near-real-time tracking rather than
+  after-the-fact bulk uploads, so this may not work from every network
+  (the tool shows a clear error rather than failing silently if it's
+  blocked), and it's worth double-checking that public visibility is
+  actually what you want before using it.
 
 ## Technical notes
 
