@@ -1,4 +1,4 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde (v73)
+# Stüve Diagram Tool — S2/RR4 Radiosonde (v76)
 
 > **License:** This project uses a custom, non-standard license (see
 > `LICENSE`). Using the app is permitted, but modifying, redistributing, or
@@ -31,7 +31,12 @@ static page (e.g. GitHub Pages).
   5000 ft) — below that altitude, everything is shown in plain feet instead
   of a flight level, matching real aviation practice. This can be
   re-adjusted any time via the small "TA: ... ft (edit)" link that appears
-  under the altitude unit selector
+  under the altitude unit selector. A separate "Speed" dropdown next to it
+  switches wind-speed numbers (tooltips, the wind-speed curve, and the
+  Wind max / bulk shear stats) between km/h (default) and kt — wind barbs
+  and the hodograph stay in knots regardless, since that's the fixed
+  international convention their shapes/rings are built around, not a
+  display preference
 - Hovering the main chart shows a prominent red crosshair marker exactly
   where the tooltip's numbers come from — and the same height is
   simultaneously marked on the wind-speed curve, the nearest wind barb, the

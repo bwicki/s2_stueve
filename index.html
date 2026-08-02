@@ -342,11 +342,11 @@
       <div class="title-block">
         <div class="eyebrow">Amateur Radiosonde Telemetry</div>
         <h1><a href="https://sparv.io/" target="_blank" rel="noopener" class="title-link">Stüve Diagram from S2/RR4 Sonde Data</a></h1>
-        <p id="subtitle">Please load Radiosonde ascent data … · v73 (2026-08-02)</p>
+        <p id="subtitle">Please load Radiosonde ascent data … · v76 (2026-08-02)</p>
         <p style="margin:2px 0 0;font-size:12px;color:var(--text-dim);font-family:var(--mono);
           display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span id="launchLoc"></span>
-          <span id="headerVersionStamp" style="visibility:hidden;">· v73 (2026-08-02)</span>
+          <span id="headerVersionStamp" style="visibility:hidden;">· v76 (2026-08-02)</span>
         </p>
       </div>
       <img class="header-logo" alt="Wicki Partners Ballonteam"
@@ -483,7 +483,7 @@
         </select>
       </div>
       <div style="display:flex;flex-direction:column;gap:3px;padding-right:16px;margin-right:2px;border-right:1px solid var(--line);">
-        <label style="font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.06em;">ALTITUDE UNIT</label>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.06em;">ALTITUDE</label>
         <div id="taEditLink" style="display:none;font-size:9.5px;color:var(--text-dim);cursor:pointer;
           white-space:nowrap;">TA: <span id="taEditLinkValue"></span> ft <span style="text-decoration:underline;">(edit)</span></div>
         <select id="altitudeUnitSelect" style="background:var(--panel-2);border:1px solid var(--line);
@@ -493,6 +493,15 @@
           <option value="agl">m AGL</option>
           <option value="ft">ft</option>
           <option value="fl">FL</option>
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;padding-right:16px;margin-right:2px;border-right:1px solid var(--line);">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.06em;">SPEED</label>
+        <select id="speedUnitSelect" style="background:var(--panel-2);border:1px solid var(--line);
+          color:var(--text);font-family:var(--mono);font-size:12px;padding:0 14px;height:36px;
+          box-sizing:border-box;border-radius:6px;cursor:pointer;">
+          <option value="kmh" selected>km/h</option>
+          <option value="kt">kt</option>
         </select>
       </div>
       <div style="display:flex;flex-direction:column;gap:3px;padding-right:16px;margin-right:2px;border-right:1px solid var(--line);">
@@ -710,7 +719,7 @@ const state = { rows: EMBEDDED_DATA, isDefault: true, source: 'Sample data (2026
   compareFlights: [], windSmoothed: true, barbIntervalSec: 30, scrubIdx: null, diagramType: 'stuve',
   viewMinPct: 0, viewMaxPct: 1000, fullTrail: RAW_FULL_TRAIL, showThetaE: false, cloudThreshold: 70,
   speedPanelWidth: null, altitudeUnit: 'amsl', windDisplayMode: 'barb', printWithPanels: true,
-  transitionAltFt: null, transitionAltConfirmed: false, sondehubUploaded: false };
+  transitionAltFt: null, transitionAltConfirmed: false, sondehubUploaded: false, speedUnit: 'kmh' };
 const COMPARE_COLORS = [
   {temp:'#d1770f', dew:'#3fae7a'},
   {temp:'#c9367a', dew:'#5a7fd6'},
@@ -1277,6 +1286,20 @@ function detectAnomalies(rows){
 // Speed/Heading columns are the balloon's GPS ground velocity, used as a proxy
 // for wind speed/direction at that level (standard radiosonde practice).
 function msToKt(ms){ return ms*1.943844; }
+// Formats a wind/air speed (given in m/s) in the currently selected display
+// unit (km/h by default, or kt). Wind barbs themselves always stay in
+// knots regardless of this setting — the barb pennant/full-barb/half-barb
+// shapes are an international meteorological convention tied specifically
+// to knots, not a display preference.
+function formatSpeed(ms){
+  if(ms==null || !isFinite(ms)) return null;
+  return state.speedUnit === 'kt' ? msToKt(ms) : ms*3.6;
+}
+function speedUnitLabel(){ return state.speedUnit === 'kt' ? 'kt' : 'km/h'; }
+// For values computed internally in knots (e.g. shear, which has
+// established meteorological thresholds defined in kt) — converts only
+// for display, without touching the underlying kt-based comparisons.
+function ktToDisplayUnit(kt){ return state.speedUnit === 'kt' ? kt : kt*1.852; }
 function windFromDeg(headingDeg){ return (headingDeg+180)%360; } // balloon travels WITH the wind
 
 function nearestByPressure(rows, targetHpa){
@@ -1468,7 +1491,7 @@ function computeStats(rows){
   const t0 = rows[0][0], t1 = rows[rows.length-1][0];
   const p0 = rows[0][2], p1 = rows[rows.length-1][2];
   const windRows = rows.filter(r=>r[6]!=null);
-  const maxWindKt = windRows.length ? Math.max(...windRows.map(r=>msToKt(r[6]))) : null;
+  const maxWindKt = windRows.length ? Math.max(...windRows.map(r=>formatSpeed(r[6]))) : null;
   return {maxAlt, minT, maxT, t0, t1, p0, p1, n: rows.length, maxWindKt};
 }
 
@@ -1481,7 +1504,7 @@ function renderStats(rows){
     ['Max. altitude', formatAltitude(s.maxAlt, rows[0][1])],
     ['Pressure start → peak', s.p0.toFixed(0)+' → '+s.p1.toFixed(0)+' hPa'],
     ['Temp min / max', s.minT.toFixed(1)+' / '+s.maxT.toFixed(1)+' °C'],
-    ['Wind max', s.maxWindKt!=null ? s.maxWindKt.toFixed(0)+' kt' : 'n/a'],
+    ['Wind max', s.maxWindKt!=null ? s.maxWindKt.toFixed(0)+' '+speedUnitLabel() : 'n/a'],
     ['Data points', s.n],
   ];
   document.getElementById('statStrip').innerHTML = items.map(([k,v])=>
@@ -1529,7 +1552,7 @@ function renderThermo(rows){
     ['tropopause', 'Tropopause', t.tropoAlt!=null ? formatAltitude(t.tropoAlt, groundAltM) : 'not reached'],
     ['thunderstorm', 'Thunderstorm chance (est.)', stormPct!=null ? stormPct+'% (K='+Math.round(k)+')' : 'sounding too shallow'],
     ['cloudCover', 'Cloud cover (est.)', `${cloudPct}% ${octasToMetar(cloudPctToOctas(cloudPct))} · ${cloudPctToOctas(cloudPct)}/8 octas${octasSvgIcon(cloudPctToOctas(cloudPct))}`],
-    ['shear', '0–6 km bulk shear', shearKt!=null ? Math.round(shearKt)+' kt' : 'not enough wind data'],
+    ['shear', '0–6 km bulk shear', shearKt!=null ? Math.round(ktToDisplayUnit(shearKt))+' '+speedUnitLabel() : 'not enough wind data'],
     ['inversions', 'Inversions', formatLayers(invLayers)],
     ['isothermal', 'Isothermal layers', formatLayers(isoLayers)],
   ];
@@ -2013,13 +2036,13 @@ function computeAnalyticalComments(rows, ctx){
       level = 'gray'; text = `Wind shear: not enough wind data to assess.`;
     } else if(shearKt >= 40){
       level = 'red';
-      text = `High wind shear risk — 0–6 km bulk shear ${Math.round(shearKt)} kt.`;
+      text = `High wind shear risk — 0–6 km bulk shear ${Math.round(ktToDisplayUnit(shearKt))} ${speedUnitLabel()}.`;
     } else if(shearKt >= 20){
       level = 'yellow';
-      text = `Moderate wind shear risk — 0–6 km bulk shear ${Math.round(shearKt)} kt.`;
+      text = `Moderate wind shear risk — 0–6 km bulk shear ${Math.round(ktToDisplayUnit(shearKt))} ${speedUnitLabel()}.`;
     } else {
       level = 'green';
-      text = `Low wind shear risk — 0–6 km bulk shear ${Math.round(shearKt)} kt.`;
+      text = `Low wind shear risk — 0–6 km bulk shear ${Math.round(ktToDisplayUnit(shearKt))} ${speedUnitLabel()}.`;
     }
     if(band && band.shearKt >= 15){
       text += ` Sharpest local change between ${formatAltitude(band.altLo, groundAltM)} and ${formatAltitude(band.altHi, groundAltM)} (≈${Math.round(band.shearKt)} kt over that band) — worth flagging for turbulence.`;
@@ -2132,8 +2155,8 @@ function layoutChart(rows){
   // much wider than 72px, clipping the curve at high wind speeds).
   const extraSpeedW = printMode ? 0 : Math.max(0, speedW - 72);
   const pad = printMode
-    ? {left:72, right: hasWind ? (state.printWithPanels ? 130 : 165) : 24, top:12, bottom:26}
-    : {left:100, right: hasWind ? (172 + extraSpeedW) : 34, top:48, bottom:44};
+    ? {left:88, right: hasWind ? (state.printWithPanels ? 130 : 165) : 24, top:12, bottom:26}
+    : {left:135, right: hasWind ? (172 + extraSpeedW) : 34, top:48, bottom:44};
   const plotW = cssWidth - pad.left - pad.right;
   const plotH = cssHeight - pad.top - pad.bottom;
 
@@ -2143,9 +2166,9 @@ function layoutChart(rows){
   const windColX = speedX1 + (printMode ? 26 : 38);
   const rightEdge = windColX + (printMode ? 16 : 24);
 
-  const maxKt = hasWind ? Math.max(...windRowsAll.map(r=>msToKt(r[6]))) : 0;
-  const sMax = Math.max(20, Math.ceil((maxKt+3)/10)*10);
-  const speedScale = kt => speedX0 + (kt/sMax)*speedW;
+  const maxSpeed = hasWind ? Math.max(...windRowsAll.map(r=>formatSpeed(r[6]))) : 0;
+  const sMax = Math.max(20, Math.ceil((maxSpeed+3)/10)*10);
+  const speedScale = v => speedX0 + (v/sMax)*speedW;
 
   // Altitude zoom window (left-hand vertical sliders): restrict the axis
   // range to a sub-band of the data without discarding/refiltering the
@@ -2348,9 +2371,11 @@ function draw(rows){
     ctx.fillText(p+' hPa', pad.left-6, y);
   }
   // effective altitude in the selected unit, interpolated from the real
-  // sounding data, shown one column further left of the pressure labels
+  // sounding data, shown in its own column clearly left of the pressure
+  // labels (right-aligned, same as the pressure column, so the two never
+  // run into each other regardless of unit-string length)
   ctx.fillStyle = cText;
-  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
   ctx.font = '9px IBM Plex Mono, monospace';
   const groundAltM = rows[0][1];
   for(let p=1050;p>=50;p-=50){
@@ -2358,11 +2383,11 @@ function draw(rows){
     if(y < pad.top-2 || y > pad.top+plotH+2) continue;
     const alt = altitudeAtPressure(rows, p);
     if(alt!=null){
-      ctx.fillText(formatAltitude(alt, groundAltM), pad.left-48, y);
+      ctx.fillText(formatAltitude(alt, groundAltM), pad.left-56, y);
     }
   }
   // transition-altitude marker on the axis, when displaying Flight Levels —
-  // left-aligned with the regular altitude labels, showing the actual value
+  // right-aligned in the same column as the regular altitude labels
   if(state.altitudeUnit === 'fl' && state.transitionAltFt){
     const taAltM = state.transitionAltFt/3.28084;
     const taP = pressureAtAltitude(rows, taAltM);
@@ -2373,14 +2398,14 @@ function draw(rows){
         ctx.lineWidth = 1.4;
         ctx.setLineDash([2,2]);
         ctx.beginPath();
-        ctx.moveTo(pad.left-52, yTA);
-        ctx.lineTo(pad.left-4, yTA);
+        ctx.moveTo(pad.left-96, yTA);
+        ctx.lineTo(pad.left-58, yTA);
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.fillStyle = cv('--amber');
         ctx.font = 'bold 9px IBM Plex Mono, monospace';
-        ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-        ctx.fillText(`TA ${state.transitionAltFt}ft`, pad.left-52, yTA-2);
+        ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+        ctx.fillText(`TA ${state.transitionAltFt}ft`, pad.left-56, yTA-2);
         ctx.fillStyle = cText;
       }
     }
@@ -2396,7 +2421,8 @@ function draw(rows){
       ctx.textBaseline = 'top';
       ctx.font = '9px IBM Plex Mono, monospace';
       ctx.fillStyle = cText;
-      ctx.fillText(formatAltitude(altTop, groundAltM), pad.left-48, yTop+2);
+      ctx.textAlign = 'right';
+      ctx.fillText(formatAltitude(altTop, groundAltM), pad.left-56, yTop+2);
       ctx.textBaseline = 'middle';
     }
   }
@@ -2835,7 +2861,7 @@ function draw(rows){
   ctx.lineWidth = 1.8;
   ctx.beginPath();
   windRowsAll.forEach((r,i)=>{
-    const x = speedScale(msToKt(r[6]));
+    const x = speedScale(formatSpeed(r[6]));
     const y = yScale(yOf(r[2]));
     if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
   });
@@ -2849,13 +2875,13 @@ function draw(rows){
   ctx.fillStyle = cTextDim;
   ctx.font = '9px IBM Plex Mono, monospace';
   ctx.textAlign='center'; ctx.textBaseline='top';
-  for(let kt=0; kt<=sMax; kt+=10){
-    ctx.fillText(String(kt), speedScale(kt), pad.top+plotH+6);
+  for(let v=0; v<=sMax; v+=10){
+    ctx.fillText(String(v), speedScale(v), pad.top+plotH+6);
   }
   ctx.fillStyle = cWindLine;
   ctx.font = '10px IBM Plex Mono, monospace';
   ctx.textBaseline='bottom';
-  ctx.fillText('Windspeed (kt)', speedX0+speedW/2, pad.top-6);
+  ctx.fillText('Windspeed ('+speedUnitLabel()+')', speedX0+speedW/2, pad.top-6);
 
   // ---------- Wind barb column ----------
   ctx.strokeStyle = cLine;
@@ -3356,7 +3382,7 @@ canvas.addEventListener('mousemove', (e)=>{
         <div class="hdr">${r[0]} UTC</div>
         <div class="row"><span class="lbl">Altitude</span><span>${formatAltitude(r[1], state.rows[0][1])}</span></div>
         <div class="row"><span class="lbl">Pressure</span><span>${r[2].toFixed(1)} hPa</span></div>
-        <div class="row"><span class="lbl">Wind</span><span>${msToKt(r[6]).toFixed(0)} kt / ${windFromDeg(r[7]).toFixed(0)}°</span></div>
+        <div class="row"><span class="lbl">Wind</span><span>${formatSpeed(r[6]).toFixed(0)} ${speedUnitLabel()} / ${windFromDeg(r[7]).toFixed(0)}°</span></div>
       `;
       if(PLOT){
         drawChartCursorDot(PLOT.xScale(r[3]), PLOT.yScale(yOf(r[2])));
@@ -3378,7 +3404,7 @@ canvas.addEventListener('mousemove', (e)=>{
     <div class="row"><span class="lbl">Temp</span><span>${pt[3].toFixed(1)} °C</span></div>
     <div class="row"><span class="lbl">Dew point</span><span>${pt[5].toFixed(1)} °C</span></div>
     <div class="row"><span class="lbl">RH</span><span>${pt[4].toFixed(0)} %</span></div>
-    ${pt[6]!=null && pt[7]!=null ? `<div class="row"><span class="lbl">Wind</span><span>${msToKt(pt[6]).toFixed(0)} kt / ${windFromDeg(pt[7]).toFixed(0)}°</span></div>` : ''}
+    ${pt[6]!=null && pt[7]!=null ? `<div class="row"><span class="lbl">Wind</span><span>${formatSpeed(pt[6]).toFixed(0)} ${speedUnitLabel()} / ${windFromDeg(pt[7]).toFixed(0)}°</span></div>` : ''}
     ${state.showThetaE ? `<div class="row"><span class="lbl">Theta-E</span><span>${thetaE(pt[3], pt[5], pt[2]).toFixed(0)} °C-eq</span></div>` : ''}
   `;
   if(PLOT){
@@ -4086,6 +4112,7 @@ document.getElementById('sondehubBtn').addEventListener('click', ()=>{
   }
   document.getElementById('sondehubPayload').value = state.sondeId ? ('S2-Sonde ID'+state.sondeId) : 'UNKNOWN';
   document.getElementById('sondehubStatus').style.display = 'none';
+  setSondehubModalSuccessState(false);
   document.getElementById('sondehubModalOverlay').style.display = 'flex';
 });
 document.getElementById('sondehubCancelBtn').addEventListener('click', ()=>{
@@ -4160,6 +4187,10 @@ document.getElementById('sondehubSendBtn').addEventListener('click', async ()=>{
       (may take a minute to appear).`;
     state.sondehubUploaded = true;
     document.getElementById('sondehubBtn').innerHTML = '☁ Upload to SondeHub <span style="color:#3fae5a;">✓</span>';
+    setSondehubModalSuccessState(true);
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Upload';
+    return;
   }catch(err){
     statusEl.style.color = '#e0554a';
     statusEl.textContent = `Upload failed — likely blocked by the browser (CORS), rejected by the API, or a network issue: ${err.message}`;
@@ -4168,8 +4199,39 @@ document.getElementById('sondehubSendBtn').addEventListener('click', async ()=>{
   sendBtn.textContent = 'Upload';
 });
 
+function setSondehubModalSuccessState(uploaded){
+  const sendBtn = document.getElementById('sondehubSendBtn');
+  const cancelBtn = document.getElementById('sondehubCancelBtn');
+  if(uploaded){
+    sendBtn.disabled = true;
+    sendBtn.style.opacity = '0.45';
+    sendBtn.style.cursor = 'default';
+    cancelBtn.textContent = 'Close';
+    cancelBtn.style.background = 'var(--amber)';
+    cancelBtn.style.borderColor = 'var(--amber)';
+    cancelBtn.style.color = '#1a1200';
+    cancelBtn.style.fontWeight = '700';
+  } else {
+    sendBtn.disabled = false;
+    sendBtn.style.opacity = '';
+    sendBtn.style.cursor = '';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.background = '';
+    cancelBtn.style.borderColor = '';
+    cancelBtn.style.color = '';
+    cancelBtn.style.fontWeight = '';
+  }
+}
+
 document.getElementById('windDisplayModeSelect').addEventListener('change', (e)=>{
   state.windDisplayMode = e.target.value;
+  draw(state.rows);
+});
+
+document.getElementById('speedUnitSelect').addEventListener('change', (e)=>{
+  state.speedUnit = e.target.value;
+  renderStats(state.rows);
+  renderThermo(state.rows);
   draw(state.rows);
 });
 
@@ -4842,7 +4904,7 @@ const FIELD_ACTUAL = {
     if(ctx.shearKt==null) return `<p>Not enough wind data was available in this flight to compute 0–6 km bulk shear.</p>`;
     const s = ctx.shearKt;
     const cat = s<20?'weak':s<35?'moderate':'strong';
-    return `<p>0–6 km bulk shear for this flight is <b>${Math.round(s)} kt</b>, in the <b>${cat}</b>
+    return `<p>0–6 km bulk shear for this flight is <b>${Math.round(ktToDisplayUnit(s))} ${speedUnitLabel()}</b>, in the <b>${cat}</b>
       range. ${
       s<20 ? 'Combined with the CAPE value of '+Math.round(ctx.t.cape)+' J/kg, any convection this profile supports would likely stay disorganized and short-lived.' :
       s<35 ? 'This level of shear can support organized multicell clusters if enough instability is also present.' :
@@ -4977,9 +5039,11 @@ function resetConfigDefaults(){
   state.cloudThreshold = 70;
   state.transitionAltFt = null;
   state.transitionAltConfirmed = false;
+  state.speedUnit = 'kmh';
 
   document.getElementById('diagramTypeSelect').value = 'stuve';
   document.getElementById('altitudeUnitSelect').value = 'amsl';
+  document.getElementById('speedUnitSelect').value = 'kmh';
   document.getElementById('barbDensitySelect').value = '30';
   document.getElementById('windDisplayModeSelect').value = 'barb';
   document.getElementById('cloudThreshInput').value = '70';
