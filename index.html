@@ -119,11 +119,11 @@
   @media (min-width:820px){ #statStrip{grid-template-columns:repeat(4,1fr);} }
   @media (min-width:1520px){ #statStrip{grid-template-columns:repeat(8,1fr);} }
   .stat{background:var(--panel);padding:10px 14px;min-width:0;position:relative;}
-  .stat-info-btn{position:absolute;top:5px;right:5px;width:16px;height:16px;border-radius:50%;
-    border:1px solid var(--text-dim);color:var(--text-dim);background:transparent;font-size:10px;
+  .stat-info-btn{position:absolute;top:5px;right:5px;width:12px;height:12px;border-radius:50%;
+    border:1px solid var(--line);color:var(--text-dim);background:transparent;font-size:8px;
     line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
-    font-family:var(--mono);padding:0;}
-  .stat-info-btn:hover{border-color:var(--amber);color:var(--amber);}
+    font-family:var(--mono);padding:0;opacity:0.6;}
+  .stat-info-btn:hover{opacity:1;border-color:var(--amber);color:var(--amber);}
   .stat-hover-tip{display:none;position:fixed;z-index:30;width:220px;
     background:rgba(10,14,20,.97);border:1px solid var(--amber);border-radius:6px;padding:9px 11px;
     font-family:var(--mono);font-size:10.5px;color:#e3e9f2;line-height:1.5;box-shadow:0 6px 20px rgba(0,0,0,.4);}
@@ -197,7 +197,7 @@
       box-shadow:none !important;border:none !important;overflow:visible !important;}
     body.printing-info-modal #infoModalContent{overflow:visible !important;padding:0 !important;}
     body.printing-info-modal #infoModalClose, body.printing-info-modal #infoModalPdf{display:none !important;}
-    .section-title{margin:6px 0 3px;font-size:8px;}
+    .section-title{margin:4px 0 2px;font-size:8px;}
     #graphVariablesTitle{display:none !important;}
     #analyticalComments{padding:6px 8px !important;font-size:8px !important;gap:4px !important;
       margin-bottom:6px !important;border:1px solid #ccc !important;}
@@ -214,7 +214,7 @@
     #launchLoc{font-size:9px !important;}
     .stat-strip{margin-bottom:6px;border-radius:4px;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));}
     #statStrip, #thermoStrip{grid-template-columns:repeat(auto-fit,minmax(126px,1fr)) !important;}
-    .stat{padding:4px 6px;}
+    .stat{padding:3px 6px;}
     .stat .k{font-size:7px;}
     .stat .v{font-size:11px;margin-top:1px;}
     .chart-card{border:none;box-shadow:none;padding:6px 6px 4px;border-radius:4px;
@@ -227,10 +227,10 @@
     #thetaECard > div:first-child, #mapCard > div:first-child{font-size:7.5px;margin-bottom:4px !important;}
     .panel-export-btn, #mapExportBtn, #mapExpandBtn, #exportPngBtn, #windPanelHandle, #printModalOverlay, #welcomeOverlay, #chartCursorOverlay, #hodoCursorOverlay, #riseCursorOverlay, #thetaECursorOverlay, #mapCursorOverlay, .stat-info-btn, .stat-hover-tip, #statHoverTip, #infoModalOverlay, #taModalOverlay, #taEditLink, #sondehubModalOverlay{display:none !important;}
     html.print-no-panels #panelsRow{display:none !important;}
-    .legend{gap:2px 8px;padding:5px 2px 1px;font-size:7px;line-height:1.15;}
+    .legend{gap:2px 8px;padding:3px 2px 1px;font-size:7px;line-height:1.1;}
     .swatch{width:10px;border-top-width:1.6px;}
     footer{display:none;}
-    #shareBar{margin:6px 0 0 !important;padding:6px 8px !important;font-size:8.5px !important;
+    #shareBar{margin:3px 0 0 !important;padding:4px 8px !important;font-size:8.5px !important;
       border:1px solid #ccc !important;page-break-inside:avoid;}
     #shareUrl{font-size:8px !important;padding:3px 5px !important;}
     #copyBtn{display:none !important;}
@@ -342,11 +342,11 @@
       <div class="title-block">
         <div class="eyebrow">Amateur Radiosonde Telemetry</div>
         <h1><a href="https://sparv.io/" target="_blank" rel="noopener" class="title-link">Stüve Diagram from S2/RR4 Sonde Data</a></h1>
-        <p id="subtitle">Please load Radiosonde ascent data … · v66 (2026-08-02)</p>
+        <p id="subtitle">Please load Radiosonde ascent data … · v73 (2026-08-02)</p>
         <p style="margin:2px 0 0;font-size:12px;color:var(--text-dim);font-family:var(--mono);
           display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span id="launchLoc"></span>
-          <span id="headerVersionStamp" style="visibility:hidden;">· v66 (2026-08-02)</span>
+          <span id="headerVersionStamp" style="visibility:hidden;">· v73 (2026-08-02)</span>
         </p>
       </div>
       <img class="header-logo" alt="Wicki Partners Ballonteam"
@@ -459,7 +459,7 @@
   <div id="analyticalComments" style="background:var(--panel);border:1px solid var(--line);border-radius:8px;
       padding:12px 16px;margin-bottom:18px;font-family:var(--mono);font-size:12px;
       position:relative;">
-    <button class="stat-info-btn" data-info-key="analyticalComments"></button>
+    <button class="stat-info-btn" data-info-key="analyticalComments">i</button>
     <div id="analyticalCommentsList" style="display:flex;flex-direction:column;gap:8px;"></div>
   </div>
 
@@ -710,7 +710,7 @@ const state = { rows: EMBEDDED_DATA, isDefault: true, source: 'Sample data (2026
   compareFlights: [], windSmoothed: true, barbIntervalSec: 30, scrubIdx: null, diagramType: 'stuve',
   viewMinPct: 0, viewMaxPct: 1000, fullTrail: RAW_FULL_TRAIL, showThetaE: false, cloudThreshold: 70,
   speedPanelWidth: null, altitudeUnit: 'amsl', windDisplayMode: 'barb', printWithPanels: true,
-  transitionAltFt: null, transitionAltConfirmed: false };
+  transitionAltFt: null, transitionAltConfirmed: false, sondehubUploaded: false };
 const COMPARE_COLORS = [
   {temp:'#d1770f', dew:'#3fae7a'},
   {temp:'#c9367a', dew:'#5a7fd6'},
@@ -836,9 +836,9 @@ function formatAltitudeValue(altM, groundAltM, unit){
 function altitudeUnitSuffix(unit){
   switch(unit){
     case 'agl': return ' m AGL';
-    case 'ft': return ' ft MSL';
+    case 'ft': return ' ft AMSL';
     case 'fl': return ''; // FL### already encodes the unit
-    default: return ' m MSL';
+    default: return ' m AMSL';
   }
 }
 // Estimates a transition altitude (ft) for the launch site from its ground
@@ -2100,7 +2100,7 @@ function layoutChart(rows){
   const dpr = window.devicePixelRatio || 1;
   const cssWidth = canvas.parentElement.clientWidth;
   const cssHeight = printMode
-    ? (state.printWithPanels ? Math.min(275, cssWidth*0.4) : Math.min(460, cssWidth*0.65))
+    ? (state.printWithPanels ? Math.min(255, cssWidth*0.4) : Math.min(460, cssWidth*0.65))
     : Math.max(520, Math.min(760, cssWidth*0.62));
   canvas.width = cssWidth*dpr;
   canvas.height = cssHeight*dpr;
@@ -2350,6 +2350,8 @@ function draw(rows){
   // effective altitude in the selected unit, interpolated from the real
   // sounding data, shown one column further left of the pressure labels
   ctx.fillStyle = cText;
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.font = '9px IBM Plex Mono, monospace';
   const groundAltM = rows[0][1];
   for(let p=1050;p>=50;p-=50){
     const y = yScale(yOf(p));
@@ -2359,25 +2361,26 @@ function draw(rows){
       ctx.fillText(formatAltitude(alt, groundAltM), pad.left-48, y);
     }
   }
-  // small transition-altitude marker on the axis, when displaying Flight Levels
+  // transition-altitude marker on the axis, when displaying Flight Levels —
+  // left-aligned with the regular altitude labels, showing the actual value
   if(state.altitudeUnit === 'fl' && state.transitionAltFt){
     const taAltM = state.transitionAltFt/3.28084;
     const taP = pressureAtAltitude(rows, taAltM);
     if(taP!=null){
       const yTA = yScale(yOf(taP));
       if(yTA >= pad.top-2 && yTA <= pad.top+plotH+2){
-        ctx.fillStyle = cv('--amber');
-        ctx.font = '8px IBM Plex Mono, monospace';
-        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-        ctx.fillText('TA ▸', pad.left-6, yTA);
         ctx.strokeStyle = cv('--amber');
-        ctx.lineWidth = 1;
-        ctx.setLineDash([1.5,1.5]);
+        ctx.lineWidth = 1.4;
+        ctx.setLineDash([2,2]);
         ctx.beginPath();
         ctx.moveTo(pad.left-52, yTA);
         ctx.lineTo(pad.left-4, yTA);
         ctx.stroke();
         ctx.setLineDash([]);
+        ctx.fillStyle = cv('--amber');
+        ctx.font = 'bold 9px IBM Plex Mono, monospace';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText(`TA ${state.transitionAltFt}ft`, pad.left-52, yTA-2);
         ctx.fillStyle = cText;
       }
     }
@@ -2391,6 +2394,8 @@ function draw(rows){
     const altTop = altitudeAtPressure(rows, pTopAxis);
     if(altTop!=null){
       ctx.textBaseline = 'top';
+      ctx.font = '9px IBM Plex Mono, monospace';
+      ctx.fillStyle = cText;
       ctx.fillText(formatAltitude(altTop, groundAltM), pad.left-48, yTop+2);
       ctx.textBaseline = 'middle';
     }
@@ -2409,7 +2414,7 @@ function draw(rows){
     ctx.fillStyle = '#3fae5a';
     ctx.font = 'bold 10px IBM Plex Mono, monospace';
     ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-    ctx.fillText(`Ground · ${formatAltitude(rows[0][1], rows[0][1])}`, pad.left+4, groundY-3);
+    ctx.fillText(`${formatAltitude(rows[0][1], rows[0][1])} · GROUND`, pad.left+4, groundY-3);
   }
 
   // ---------- Freezing level & tropopause markers ----------
@@ -2910,7 +2915,8 @@ function drawMiniProfile(canvasId, cardId, rows, getValue, color, unitDecimals){
   const canvas = document.getElementById(canvasId);
   const dpr = window.devicePixelRatio || 1;
   const cssWidth = canvas.parentElement.clientWidth;
-  const cssHeight = printMode ? 100 : Math.max(240, Math.min(360, cssWidth*0.6));
+  if(cssWidth <= 0) return; // hidden ancestor (e.g. "print without panels") — nothing to draw
+  const cssHeight = printMode ? 88 : Math.max(240, Math.min(360, cssWidth*0.6));
   canvas.width = cssWidth*dpr; canvas.height = cssHeight*dpr;
   const miniOverlay = document.getElementById(canvasId.replace('Canvas','CursorOverlay'));
   if(miniOverlay){
@@ -3031,7 +3037,7 @@ function renderFlightMap(rows){
   document.getElementById('mapContainer').style.display = 'block';
 
   const container = document.getElementById('mapContainer');
-  const h = printMode ? 100 : Math.max(240, Math.min(360, container.clientWidth*0.6));
+  const h = printMode ? 88 : Math.max(240, Math.min(360, container.clientWidth*0.6));
   container.style.height = h+'px';
   MAP_TRAIL = trail;
   const mapOverlay = document.getElementById('mapCursorOverlay');
@@ -3088,7 +3094,8 @@ function drawFlightPathFallback(trail){
 
   const dpr = window.devicePixelRatio || 1;
   const cssWidth = canvas.parentElement.clientWidth;
-  const cssHeight = printMode ? 100 : Math.max(240, Math.min(360, cssWidth*0.6));
+  if(cssWidth <= 0) return; // hidden ancestor (e.g. "print without panels") — nothing to draw
+  const cssHeight = printMode ? 88 : Math.max(240, Math.min(360, cssWidth*0.6));
   canvas.width = cssWidth*dpr; canvas.height = cssHeight*dpr;
   canvas.style.height = cssHeight+'px';
   const ctx2 = canvas.getContext('2d');
@@ -3159,7 +3166,8 @@ function drawHodograph(rows){
 
   const canvas2 = document.getElementById('hodoCanvas');
   const dpr = window.devicePixelRatio || 1;
-  const size = printMode ? Math.min(100, canvas2.parentElement.clientWidth) : Math.min(390, canvas2.parentElement.clientWidth*0.85);
+  if(canvas2.parentElement.clientWidth <= 0) return; // hidden ancestor (e.g. "print without panels") — nothing to draw
+  const size = printMode ? Math.min(88, canvas2.parentElement.clientWidth) : Math.min(390, canvas2.parentElement.clientWidth*0.85);
   canvas2.width = size*dpr; canvas2.height = size*dpr;
   canvas2.style.width = size+'px';
   canvas2.style.height = size+'px';
@@ -4042,11 +4050,41 @@ document.getElementById('taCancelBtn').addEventListener('click', ()=>{
 // there is no guarantee it accepts cross-origin requests directly from a
 // browser page like this one — if it's blocked, the error is shown rather
 // than failing silently.
+// Fills in an interpolated lat/lon for rows that fall between two GPS
+// fixes (GPS updates less often than the other sensors in this data), so
+// the full time/sensor resolution can be uploaded, not just the sparser
+// set of rows that happen to have a native GPS fix.
+function interpolateGpsForAllRows(rows){
+  const gpsIdx = [];
+  rows.forEach((r,i)=>{ if(r[8]!=null && r[9]!=null) gpsIdx.push(i); });
+  if(gpsIdx.length === 0) return [];
+  const out = [];
+  let lo = 0;
+  for(let i=0;i<rows.length;i++){
+    const r = rows[i];
+    if(r[8]!=null && r[9]!=null){ out.push({row:r, lat:r[8], lon:r[9]}); continue; }
+    while(lo < gpsIdx.length-1 && gpsIdx[lo+1] <= i) lo++;
+    const beforeIdx = gpsIdx[lo] <= i ? gpsIdx[lo] : null;
+    const afterIdx = gpsIdx.find(gi => gi >= i);
+    if(beforeIdx==null && afterIdx==null) continue;
+    if(beforeIdx==null){ out.push({row:r, lat:rows[afterIdx][8], lon:rows[afterIdx][9]}); continue; }
+    if(afterIdx==null || afterIdx===beforeIdx){ out.push({row:r, lat:rows[beforeIdx][8], lon:rows[beforeIdx][9]}); continue; }
+    const f = (i-beforeIdx)/(afterIdx-beforeIdx);
+    out.push({row:r, lat: rows[beforeIdx][8]+f*(rows[afterIdx][8]-rows[beforeIdx][8]),
+                      lon: rows[beforeIdx][9]+f*(rows[afterIdx][9]-rows[beforeIdx][9])});
+  }
+  return out;
+}
+
 const SONDEHUB_ENDPOINT = 'https://api.v2.sondehub.org/amateur/telemetry';
 
 document.getElementById('sondehubBtn').addEventListener('click', ()=>{
   if(!state.rows || state.rows.length < 2){ alert('No flight data loaded.'); return; }
-  document.getElementById('sondehubPayload').value = state.sondeId || 'UNKNOWN';
+  if(state.sondehubUploaded){
+    const proceed = confirm('This flight was already uploaded to SondeHub. Upload the same data again?');
+    if(!proceed) return;
+  }
+  document.getElementById('sondehubPayload').value = state.sondeId ? ('S2-Sonde ID'+state.sondeId) : 'UNKNOWN';
   document.getElementById('sondehubStatus').style.display = 'none';
   document.getElementById('sondehubModalOverlay').style.display = 'flex';
 });
@@ -4072,12 +4110,13 @@ document.getElementById('sondehubSendBtn').addEventListener('click', async ()=>{
   statusEl.textContent = 'Sending telemetry…';
 
   try{
-    // Upload every GPS-tagged point (no thinning) — chunked into batches so
+    // Upload every row at full resolution (interpolating position for rows
+    // between native GPS fixes, not thinning) — chunked into batches so
     // a single oversized request doesn't risk rejection by the API.
-    const gpsRows = state.rows.filter(r=>r[8]!=null && r[9]!=null);
-    if(gpsRows.length === 0) throw new Error('No GPS-tagged points available to upload.');
+    const withGps = interpolateGpsForAllRows(state.rows);
+    if(withGps.length === 0) throw new Error('No GPS-tagged points available to upload.');
     const nowIso = new Date().toISOString();
-    const allPackets = gpsRows.map(r=>{
+    const allPackets = withGps.map(({row:r, lat, lon})=>{
       const iso = r[0].replace(' ', 'T')+'Z';
       const pkt = {
         software_name: 'Stueve-Diagram-Tool',
@@ -4086,8 +4125,8 @@ document.getElementById('sondehubSendBtn').addEventListener('click', async ()=>{
         payload_callsign: payloadCallsign,
         time_received: nowIso,
         datetime: iso,
-        lat: r[8],
-        lon: r[9],
+        lat: lat,
+        lon: lon,
         alt: r[1],
       };
       if(r[3]!=null) pkt.temp = r[3];
@@ -4114,10 +4153,13 @@ document.getElementById('sondehubSendBtn').addEventListener('click', async ()=>{
     }
 
     statusEl.style.color = '#3fae5a';
-    statusEl.innerHTML = `Uploaded all ${uploaded} GPS-tagged points. View it at
+    statusEl.innerHTML = `Uploaded all ${uploaded} points (full resolution, with interpolated
+      position where needed). View it at
       <a href="https://amateur.sondehub.org/#!mt=Mapnik&f=${encodeURIComponent(payloadCallsign)}"
       target="_blank" rel="noopener" style="color:#3fae5a;">amateur.sondehub.org ↗</a>
       (may take a minute to appear).`;
+    state.sondehubUploaded = true;
+    document.getElementById('sondehubBtn').innerHTML = '☁ Upload to SondeHub <span style="color:#3fae5a;">✓</span>';
   }catch(err){
     statusEl.style.color = '#e0554a';
     statusEl.textContent = `Upload failed — likely blocked by the browser (CORS), rejected by the API, or a network issue: ${err.message}`;
@@ -4929,6 +4971,8 @@ function resetConfigDefaults(){
   state.barbIntervalSec = 30;
   state.windSmoothed = true;
   state.windDisplayMode = 'barb';
+  state.sondehubUploaded = false;
+  document.getElementById('sondehubBtn').innerHTML = '☁ Upload to SondeHub';
   state.showThetaE = false;
   state.cloudThreshold = 70;
   state.transitionAltFt = null;

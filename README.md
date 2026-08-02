@@ -1,4 +1,4 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde (v66)
+# Stüve Diagram Tool — S2/RR4 Radiosonde (v73)
 
 > **License:** This project uses a custom, non-standard license (see
 > `LICENSE`). Using the app is permitted, but modifying, redistributing, or
@@ -165,11 +165,15 @@ printed page if one hasn't been created yet in that session.
   saved flights are private to your device and browser.
 - Opening the flight-path map in a new window requires pop-ups to be
   allowed for this page.
-- "Upload to SondeHub" sends every GPS-tagged point of this flight's
-  telemetry (position, altitude, temperature, humidity) directly from your
-  browser to SondeHub's public API, in batches of 500 points per request —
-  nothing is uploaded until you explicitly click "Upload" in that
-  dialog, and the data becomes publicly visible on their map afterward.
+- "Upload to SondeHub" sends this flight's telemetry (position, altitude,
+  temperature, humidity) directly from your browser to SondeHub's public
+  API, in batches of 500 points per request. Every row is uploaded at full
+  resolution — GPS position is interpolated for rows that fall between two
+  native GPS fixes, since GPS updates less often than the other sensors in
+  this data. Nothing is uploaded until you explicitly click "Upload" in
+  that dialog, and the data becomes publicly visible on their map
+  afterward; a ✓ appears on the button once it succeeds, and clicking it
+  again asks for confirmation before re-uploading the same flight.
   SondeHub's API is built for near-real-time tracking rather than
   after-the-fact bulk uploads, so this may not work from every network
   (the tool shows a clear error rather than failing silently if it's
