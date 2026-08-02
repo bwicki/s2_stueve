@@ -1,4 +1,4 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde (v93)
+# Stüve Diagram Tool — S2/RR4 Radiosonde (v1.03.01)
 
 > The in-app title now reads "Radiosonde Sounding Diagram" (it covers more
 > than just Stüve diagrams) — this repository/document keeps its original
@@ -17,10 +17,11 @@ static page (e.g. GitHub Pages).
 
 **Live version:** https://sparv.io/ · this repository
 
-> The version number in this title matches the "· vNN (date)" stamp shown
-> next to the launch location in the app's own header — check that stamp
-> against this README's title to confirm you're looking at matching
-> documentation for the file you have.
+> The version number in this title matches the "· v1.DD.YY (date)" stamp
+> shown next to the launch location in the app's own header — check that
+> stamp against this README's title to confirm you're looking at matching
+> documentation for the file you have. DD counts the working day, YY the
+> build within that day.
 
 ## What it does
 
