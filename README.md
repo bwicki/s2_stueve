@@ -1,4 +1,4 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde (v85)
+# Stüve Diagram Tool — S2/RR4 Radiosonde (v87)
 
 > The in-app title now reads "Radiosonde Sounding Diagram" (it covers more
 > than just Stüve diagrams) — this repository/document keeps its original
