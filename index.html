@@ -361,11 +361,11 @@
       <div class="title-block">
         <div class="eyebrow">Amateur Radiosonde Telemetry</div>
         <h1><a href="https://sparv.io/" target="_blank" rel="noopener" class="title-link">Radiosonde Sounding Diagram</a></h1>
-        <p id="subtitle">please load Windsond S2 ascent data … · v87 (2026-08-02)</p>
+        <p id="subtitle">please load Windsond S2 ascent data … · v91 (2026-08-02)</p>
         <p style="margin:2px 0 0;font-size:12px;color:var(--text-dim);font-family:var(--mono);
           display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span id="launchLoc"></span>
-          <span id="headerVersionStamp" style="visibility:hidden;">· v87 (2026-08-02)</span>
+          <span id="headerVersionStamp" style="visibility:hidden;">· v91 (2026-08-02)</span>
         </p>
       </div>
       <img class="header-logo" alt="Wicki Partners Ballonteam"
@@ -805,7 +805,29 @@ function parseCSV(text){
   // Keep the full flight's coordinate trail (incl. descent) for the map,
   // before slicing the analysis data down to ascent-only below.
   const fullTrail = [];
-  for(const r of rows){ if(r[8]!=null && r[9]!=null) fullTrail.push([r[8], r[9], r[1]]); }
+  // GPS fixes naturally update less often than the other sensors (not a
+  // "gap" by themselves), so — unlike the row-level interpolation above —
+  // detect gaps here by comparing consecutive GPS timestamps against the
+  // trail's own typical fix interval, the same way fillInterpolatedGaps
+  // does for the main time series.
+  const gpsRows = rows.filter(r=>r[8]!=null && r[9]!=null);
+  const gpsDeltas = [];
+  for(let i=1;i<gpsRows.length;i++){
+    const dt = parseCsvTime(gpsRows[i][0]) - parseCsvTime(gpsRows[i-1][0]);
+    if(dt > 0) gpsDeltas.push(dt);
+  }
+  gpsDeltas.sort((a,b)=>a-b);
+  const gpsTypical = gpsDeltas.length ? gpsDeltas[Math.floor(gpsDeltas.length/2)] : 1;
+  const gpsGapThreshold = Math.max(gpsTypical*5, gpsTypical+15);
+  for(let i=0;i<gpsRows.length;i++){
+    const r = gpsRows[i];
+    let gap = false;
+    if(i>0){
+      const dt = parseCsvTime(r[0]) - parseCsvTime(gpsRows[i-1][0]);
+      gap = dt > gpsGapThreshold;
+    }
+    fullTrail.push([r[8], r[9], r[1], gap]);
+  }
   LAST_PARSED_TRAIL = fullTrail.length ? fullTrail : null;
 
   // ascent only: up to max altitude
@@ -834,14 +856,22 @@ function fillInterpolatedGaps(rows){
   if(deltas.length === 0) return;
   deltas.sort((a,b)=>a-b);
   const typical = deltas[Math.floor(deltas.length/2)] || 1;
-  const gapThreshold = Math.max(typical*1.8, typical+1);
+  // Two thresholds: any actual gap gets filled with interpolated rows so
+  // the series stays structurally continuous, but only a gap substantially
+  // larger than the sounding's normal cadence — several consecutive
+  // samples missing, not just an occasional single dropped value — gets
+  // flagged (and so drawn dashed). Routine 1-2 sample jitter, which
+  // happens constantly in real telemetry, is treated as normal.
+  const fillThreshold = Math.max(typical*1.4, typical+0.5);
+  const flagThreshold = Math.max(typical*5, typical+7);
 
   const out = [rows[0]];
   for(let i=1;i<rows.length;i++){
     const prev = rows[i-1], cur = rows[i];
     const tPrev = parseCsvTime(prev[0]), tCur = parseCsvTime(cur[0]);
     const dt = tCur - tPrev;
-    if(dt > gapThreshold && isFinite(dt)){
+    if(dt > fillThreshold && isFinite(dt)){
+      const flag = dt > flagThreshold;
       const steps = Math.round(dt/typical);
       for(let s=1; s<steps; s++){
         const f = s/steps;
@@ -852,7 +882,7 @@ function fillInterpolatedGaps(rows){
           lerp(prev[1],cur[1]), lerp(prev[2],cur[2]), lerp(prev[3],cur[3]),
           lerp(prev[4],cur[4]), lerp(prev[5],cur[5]), lerp(prev[6],cur[6]),
           lerp(prev[7],cur[7]), lerp(prev[8],cur[8]), lerp(prev[9],cur[9]),
-          lerp(prev[10],cur[10]), true
+          lerp(prev[10],cur[10]), flag
         ]);
       }
     }
@@ -1422,7 +1452,17 @@ function smoothWindRows(windRows, halfWin=7){
 // Returns the wind-bearing rows to actually plot: raw measurements or the
 // smoothed version, depending on the current toggle state.
 function activeWindRows(rows){
-  const raw = rows.filter(r=>r[6]!=null && r[7]!=null);
+  const rawWithIdx = [];
+  rows.forEach((r,i)=>{ if(r[6]!=null && r[7]!=null) rawWithIdx.push({row:r, idx:i}); });
+  const raw = rawWithIdx.map((item,k)=>{
+    const gapBefore = k>0 && (item.idx - rawWithIdx[k-1].idx > 4);
+    if(gapBefore && item.row[11]!==true){
+      const copy = item.row.slice();
+      copy[11] = true;
+      return copy;
+    }
+    return item.row;
+  });
   return state.windSmoothed ? smoothWindRows(raw) : raw;
 }
 
@@ -1630,15 +1670,19 @@ function renderThermo(rows){
     ['freezeLevel', 'Freezing level', t.freezeAlt!=null ? formatAltitude(t.freezeAlt, groundAltM) : 'not in sounding'],
     ['tropopause', 'Tropopause', t.tropoAlt!=null ? formatAltitude(t.tropoAlt, groundAltM) : 'not reached'],
     ['thunderstorm', 'Thunderstorm chance (est.)', stormPct!=null ? stormPct+'% (K='+Math.round(k)+')' : 'sounding too shallow'],
-    ['cloudCover', 'Cloud cover (est.)', `${cloudPct}% ${octasToMetar(cloudPctToOctas(cloudPct))} · ${cloudPctToOctas(cloudPct)}/8 octas${octasSvgIcon(cloudPctToOctas(cloudPct))}`],
+    ['cloudCover', 'Cloud cover (est.)', `${cloudPct}% ${octasToMetar(cloudPctToOctas(cloudPct))} · ${cloudPctToOctas(cloudPct)}/8 octas`],
     ['shear', '0–6 km bulk shear', shearKt!=null ? Math.round(ktToDisplayUnit(shearKt))+' '+speedUnitLabel() : 'not enough wind data'],
     ['inversions', 'Inversions', formatLayers(invLayers)],
     ['isothermal', 'Isothermal layers', formatLayers(isoLayers)],
   ];
   el.innerHTML = items.map(([key,k,v])=>{
     const info = FIELD_INFO[key];
+    const octasBadge = key==='cloudCover'
+      ? `<span style="position:absolute;top:5px;right:20px;">${octasSvgIcon(cloudPctToOctas(cloudPct), 13)}</span>`
+      : '';
     return `<div class="stat">
       <div class="k">${k}</div><div class="v">${v}</div>
+      ${octasBadge}
       ${info ? `<button class="stat-info-btn" data-info-key="${key}">i</button>` : ''}
     </div>`;
   }).join('');
@@ -2190,7 +2234,7 @@ function renderLegend(){
   ).join('')
     + `<div class="item">🎌 Wind barb: pennant=50kt, full barb=10kt, half barb=5kt, circle=calm</div>`
     + `<div class="item"><span style="width:12px;height:12px;background:#e0554a;opacity:.5;display:inline-block;border-radius:2px;"></span> CAPE (positive area)</div>`
-    + `<div class="item"><span style="width:12px;height:12px;border-radius:50%;border:1.5px solid var(--amber);display:inline-block;"></span> LCL (lifting condensation level — cloud base if lifted)</div>`
+    + `<div class="item"><svg width="14" height="14" style="vertical-align:middle;"><circle cx="7" cy="7" r="3" fill="var(--amber)"/><circle cx="7" cy="7" r="6" fill="none" stroke="var(--amber)" stroke-width="1"/></svg> LCL (lifting condensation level — cloud base if lifted)</div>`
     + `<div class="item"><span style="width:0;height:0;display:inline-block;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:10px solid #e0554a;"></span> LFC (level of free convection — where CAPE begins)</div>`
     + `<div class="item"><span style="width:12px;height:12px;background:#4a90c4;opacity:.5;display:inline-block;border-radius:2px;"></span> CIN (negative area)</div>`
     + state.compareFlights.map((cf,i)=>{
@@ -2531,13 +2575,17 @@ function draw(rows){
     const yPeak = yScale(yOf(peakRow[2]));
     if(yPeak >= pad.top-2 && yPeak <= pad.top+plotH+2){
       const peakColor = '#a8712e';
-      ctx.fillStyle = peakColor;
+      const peakLabel = `💥 ${formatAltitude(peakRow[1], rows[0][1])} / ${Math.round(peakRow[2])} hPa`;
       ctx.font = 'bold 9px IBM Plex Mono, monospace';
       ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-      ctx.fillText(
-        `💥 ${formatAltitude(peakRow[1], rows[0][1])} / ${Math.round(peakRow[2])} hPa`,
-        pad.left-56, yPeak
-      );
+      // Background badge so this sits visibly above (and doesn't have to
+      // compete with) whatever regular altitude/pressure labels would
+      // otherwise land at the same height on the axis.
+      const labelW = ctx.measureText(peakLabel).width;
+      ctx.fillStyle = cv('--panel');
+      ctx.fillRect(pad.left-8-labelW, yPeak-7, labelW+10, 14);
+      ctx.fillStyle = peakColor;
+      ctx.fillText(peakLabel, pad.left-6, yPeak);
       ctx.fillStyle = cText;
     }
   }
@@ -2795,17 +2843,33 @@ function draw(rows){
     }
     ctx.globalAlpha = 1;
 
+    // LCL/LFC markers must stay true circles/triangles even in Skew-T mode,
+    // where a shear transform is otherwise applied to everything drawn on
+    // the chart — so these are drawn with that shear temporarily undone,
+    // at the same resulting screen position it would otherwise land at.
+    function drawUnskewedAt(logicalX, logicalY, drawFn){
+      const dpr = window.devicePixelRatio || 1;
+      const m = ctx.getTransform();
+      const devicePt = m.transformPoint(new DOMPoint(logicalX, logicalY));
+      ctx.save();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      drawFn(devicePt.x/dpr, devicePt.y/dpr);
+      ctx.restore();
+    }
+
     // LCL marker
     const lclX = xScale(thermo.lcl.T), lclY = yScale(yOf(thermo.lcl.p));
-    ctx.fillStyle = cParcel;
-    ctx.beginPath();
-    ctx.arc(lclX, lclY, 3.5, 0, Math.PI*2);
-    ctx.fill();
-    ctx.strokeStyle = cParcel;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(lclX, lclY, 6, 0, Math.PI*2);
-    ctx.stroke();
+    drawUnskewedAt(lclX, lclY, (x,y)=>{
+      ctx.fillStyle = cParcel;
+      ctx.beginPath();
+      ctx.arc(x, y, 3.5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.strokeStyle = cParcel;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, Math.PI*2);
+      ctx.stroke();
+    });
 
     // LFC marker (level of free convection) — where the parcel path
     // actually starts being warmer than the environment (CAPE begins).
@@ -2813,16 +2877,18 @@ function draw(rows){
     if(thermo.lfcP!=null){
       const lfcT = parcelTempAtLocal(thermo.lfcP);
       const lfcX = xScale(lfcT), lfcY = yScale(yOf(thermo.lfcP));
-      ctx.fillStyle = '#e0554a';
-      ctx.beginPath();
-      ctx.moveTo(lfcX, lfcY-6);
-      ctx.lineTo(lfcX-5.5, lfcY+4);
-      ctx.lineTo(lfcX+5.5, lfcY+4);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = '#8a2f26';
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      drawUnskewedAt(lfcX, lfcY, (x,y)=>{
+        ctx.fillStyle = '#e0554a';
+        ctx.beginPath();
+        ctx.moveTo(x, y-6);
+        ctx.lineTo(x-5.5, y+4);
+        ctx.lineTo(x+5.5, y+4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#8a2f26';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
     }
   }
 
@@ -3022,7 +3088,10 @@ function draw(rows){
 // ---------- Generic small height-profile chart (rise speed, theta-e, ...) ----------
 function drawMiniProfile(canvasId, cardId, rows, getValue, color, unitDecimals){
   const card = document.getElementById(cardId);
-  const pts = rows.map(r=>({v:getValue(r), y:yOf(r[2]), interp: r[11]===true})).filter(p=>p.v!=null && isFinite(p.v));
+  const pts = rows.map((r,i)=>({v:getValue(r), y:yOf(r[2]), interp: r[11]===true, idx:i})).filter(p=>p.v!=null && isFinite(p.v));
+  for(let k=1;k<pts.length;k++){
+    if(pts[k].idx - pts[k-1].idx > 4) pts[k].interp = true;
+  }
   if(pts.length < 5){ card.style.display='none'; return; }
   card.style.display = 'block';
 
@@ -3130,13 +3199,41 @@ function drawMiniProfile(canvasId, cardId, rows, getValue, color, unitDecimals){
 // as the reverse-geocoding lookup). If Leaflet failed to load (offline,
 // blocked), the panel is simply hidden rather than erroring.
 let LEAFLET_MAP = null;
+// Draws `trail` (an array of [lat, lon, alt, interp] points) as one or more
+// Leaflet polylines, switching to a dashed style for stretches where the
+// GPS trail has a gap (trail[i][3] true) — analogous to the dashed
+// treatment used for the main chart's curves. Returns a featureGroup so
+// callers can still call .getBounds() on the combined result.
+function drawGroupedPolylines(map, trail){
+  const layers = [];
+  let i = 0;
+  while(i < trail.length-1){
+    const dashed = !!(trail[i][3] || trail[i+1][3]);
+    let j = i;
+    while(j < trail.length-1 && !!(trail[j][3] || trail[j+1][3]) === dashed) j++;
+    const segPts = [];
+    for(let k=i;k<=j;k++) segPts.push([trail[k][0], trail[k][1]]);
+    const poly = L.polyline(segPts, {
+      color:'#e0554a', weight: dashed ? 2 : 2.5, dashArray: dashed ? '5,5' : null
+    }).addTo(map);
+    layers.push(poly);
+    i = j;
+  }
+  return L.featureGroup(layers);
+}
+
 function renderFlightMap(rows){
   const card = document.getElementById('mapCard');
   // Prefer the full flight trail (ascent + descent) so launch/peak/landing
   // are genuinely distinct points; fall back to the ascent-only data (e.g.
   // for datasets loaded via an older share link) where peak == last point.
   const useFull = Array.isArray(state.fullTrail) && state.fullTrail.length >= 2;
-  const trail = useFull ? state.fullTrail : rows.filter(r=>r[8]!=null && r[9]!=null).map(r=>[r[8], r[9], r[1]]);
+  let trail = useFull ? state.fullTrail : rows.filter(r=>r[8]!=null && r[9]!=null).map(r=>[r[8], r[9], r[1]]);
+  const {zoomed, altLo, altHi} = getZoomAltRange();
+  if(zoomed){
+    const filtered = trail.filter(t=>t[2]>=altLo && t[2]<=altHi);
+    if(filtered.length >= 2) trail = filtered;
+  }
   if(trail.length < 2){ card.style.display='none'; return; }
   card.style.display = 'block';
 
@@ -3172,7 +3269,7 @@ function renderFlightMap(rows){
       maxZoom: 18, attribution: '&copy; OpenStreetMap'
     }).addTo(LEAFLET_MAP);
 
-    const line = L.polyline(pts, {color:'#e0554a', weight:2.5}).addTo(LEAFLET_MAP);
+    const line = drawGroupedPolylines(LEAFLET_MAP, trail);
     L.circleMarker(pts[0], {radius:6, color:'#1a6b30', weight:2, fillColor:'#3fae5a', fillOpacity:1})
       .addTo(LEAFLET_MAP).bindTooltip('Launch / release');
 
@@ -3244,12 +3341,10 @@ function drawFlightPathFallback(trail){
 
   ctx2.strokeStyle = '#e0554a';
   ctx2.lineWidth = 2;
-  ctx2.beginPath();
-  trail.forEach((t,i)=>{
-    const x=X(t[1]), y=Y(t[0]);
-    if(i===0) ctx2.moveTo(x,y); else ctx2.lineTo(x,y);
-  });
-  ctx2.stroke();
+  strokeDashAwarePath(ctx2, trail,
+    t => [X(t[1]), Y(t[0])],
+    t => !!t[3]
+  );
 
   let topIdx=0;
   for(let i=1;i<trail.length;i++) if(trail[i][2]>trail[topIdx][2]) topIdx=i;
@@ -3270,6 +3365,28 @@ function drawFlightPathFallback(trail){
 }
 
 // ---------- Hodograph ----------
+// Shared vertical-zoom helpers, so the hodograph, rise-speed/Theta-E mini
+// profiles, and flight-path map all respect the same altitude window as
+// the main chart's zoom sliders, instead of always showing the full flight.
+function getZoomAltRange(){
+  const rows = state.rows;
+  const zoomed = (state.viewMinPct>0 || (state.viewMaxPct!=null && state.viewMaxPct<1000));
+  if(!rows || rows.length<2 || !zoomed) return {zoomed:false, altLo:-Infinity, altHi:Infinity};
+  const dataAlts = rows.map(r=>r[1]);
+  const dataAltMin = Math.min(...dataAlts), dataAltMax = Math.max(...dataAlts);
+  const altLo = dataAltMin + (dataAltMax-dataAltMin)*(state.viewMinPct||0)/1000;
+  const altHi = dataAltMin + (dataAltMax-dataAltMin)*(state.viewMaxPct!=null?state.viewMaxPct:1000)/1000;
+  return {zoomed:true, altLo, altHi};
+}
+function getZoomedRows(){
+  const rows = state.rows;
+  if(!rows || rows.length<2) return rows;
+  const {zoomed, altLo, altHi} = getZoomAltRange();
+  if(!zoomed) return rows;
+  const filtered = rows.filter(r=>r[1]>=altLo && r[1]<=altHi);
+  return filtered.length>=2 ? filtered : rows;
+}
+
 function drawHodograph(rows){
   const card = document.getElementById('hodoCard');
   const windRows = activeWindRows(rows);
@@ -3718,10 +3835,10 @@ function renderAll(){
   renderLegend();
   setupScrubber(state.rows);
   draw(state.rows);
-  drawHodograph(state.rows);
-  drawMiniProfile('riseCanvas','riseCard', state.rows, r=>r[10], '#e0a83f', 1);
-  drawMiniProfile('thetaECanvas','thetaECard', state.rows, r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
-  renderFlightMap(state.rows);
+  drawHodograph(getZoomedRows());
+  drawMiniProfile('riseCanvas','riseCard', getZoomedRows(), r=>r[10], '#e0a83f', 1);
+  drawMiniProfile('thetaECanvas','thetaECard', getZoomedRows(), r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
+  renderFlightMap(getZoomedRows());
   updateLaunchLocation(state.rows);
   renderAnomalies(state.rows);
   updateTaEditLink();
@@ -3733,9 +3850,9 @@ function renderAll(){
 window.addEventListener('resize', ()=>{
   if(document.getElementById('dataView').style.display === 'none') return;
   draw(state.rows);
-  drawHodograph(state.rows);
-  drawMiniProfile('riseCanvas','riseCard', state.rows, r=>r[10], '#e0a83f', 1);
-  drawMiniProfile('thetaECanvas','thetaECard', state.rows, r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
+  drawHodograph(getZoomedRows());
+  drawMiniProfile('riseCanvas','riseCard', getZoomedRows(), r=>r[10], '#e0a83f', 1);
+  drawMiniProfile('thetaECanvas','thetaECard', getZoomedRows(), r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
   if(LEAFLET_MAP) LEAFLET_MAP.invalidateSize();
 });
 
@@ -3811,16 +3928,16 @@ function forceLightRedraw(cb){
   const prevTheme = document.documentElement.dataset.theme;
   document.documentElement.dataset.theme = 'light';
   draw(state.rows);
-  drawHodograph(state.rows);
-  drawMiniProfile('riseCanvas','riseCard', state.rows, r=>r[10], '#e0a83f', 1);
-  drawMiniProfile('thetaECanvas','thetaECard', state.rows, r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
+  drawHodograph(getZoomedRows());
+  drawMiniProfile('riseCanvas','riseCard', getZoomedRows(), r=>r[10], '#e0a83f', 1);
+  drawMiniProfile('thetaECanvas','thetaECard', getZoomedRows(), r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
   setTimeout(()=>{
     cb();
     document.documentElement.dataset.theme = prevTheme;
     draw(state.rows);
-    drawHodograph(state.rows);
-    drawMiniProfile('riseCanvas','riseCard', state.rows, r=>r[10], '#e0a83f', 1);
-    drawMiniProfile('thetaECanvas','thetaECard', state.rows, r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
+    drawHodograph(getZoomedRows());
+    drawMiniProfile('riseCanvas','riseCard', getZoomedRows(), r=>r[10], '#e0a83f', 1);
+    drawMiniProfile('thetaECanvas','thetaECard', getZoomedRows(), r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
   }, 60);
 }
 
@@ -4421,6 +4538,7 @@ function updateAltRangeFill(){
   fill.style.top = topPx+'px';
 }
 
+let mapZoomUpdateTimer = null;
 function handleAltRangeInput(){
   let lo = parseFloat(document.getElementById('altRangeMin').value);
   let hi = parseFloat(document.getElementById('altRangeMax').value);
@@ -4434,6 +4552,13 @@ function handleAltRangeInput(){
   state.viewMaxPct = hi;
   updateAltRangeFill();
   draw(state.rows);
+  drawHodograph(getZoomedRows());
+  drawMiniProfile('riseCanvas','riseCard', getZoomedRows(), r=>r[10], '#e0a83f', 1);
+  drawMiniProfile('thetaECanvas','thetaECard', getZoomedRows(), r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
+  // The map (especially the real Leaflet one) is comparatively expensive to
+  // rebuild, so it's debounced rather than redrawn on every single drag step.
+  clearTimeout(mapZoomUpdateTimer);
+  mapZoomUpdateTimer = setTimeout(()=>renderFlightMap(getZoomedRows()), 180);
 }
 document.getElementById('altRangeMin').addEventListener('input', handleAltRangeInput);
 document.getElementById('altRangeMax').addEventListener('input', handleAltRangeInput);
@@ -4443,6 +4568,10 @@ document.getElementById('altRangeReset').addEventListener('click', ()=>{
   document.getElementById('altRangeMax').value = 1000;
   updateAltRangeFill();
   draw(state.rows);
+  drawHodograph(state.rows);
+  drawMiniProfile('riseCanvas','riseCard', state.rows, r=>r[10], '#e0a83f', 1);
+  drawMiniProfile('thetaECanvas','thetaECard', state.rows, r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
+  renderFlightMap(state.rows);
 });
 
 document.getElementById('scrubber').addEventListener('input', (e)=>{
@@ -5126,9 +5255,9 @@ window.addEventListener('beforeprint', ()=>{
   printMode = true;
   if(document.getElementById('dataView').style.display !== 'none'){
     draw(state.rows);
-    drawHodograph(state.rows);
-    drawMiniProfile('riseCanvas','riseCard', state.rows, r=>r[10], '#e0a83f', 1);
-    drawMiniProfile('thetaECanvas','thetaECard', state.rows, r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
+    drawHodograph(getZoomedRows());
+    drawMiniProfile('riseCanvas','riseCard', getZoomedRows(), r=>r[10], '#e0a83f', 1);
+    drawMiniProfile('thetaECanvas','thetaECard', getZoomedRows(), r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
     if(document.getElementById('mapFallbackCanvas').style.display === 'block'){
       const useFull = Array.isArray(state.fullTrail) && state.fullTrail.length >= 2;
       const trail = useFull ? state.fullTrail : state.rows.filter(r=>r[8]!=null && r[9]!=null).map(r=>[r[8], r[9], r[1]]);
@@ -5143,9 +5272,9 @@ window.addEventListener('afterprint', ()=>{
   document.documentElement.dataset.theme = _preprintTheme || '';
   printMode = false;
   draw(state.rows);
-  drawHodograph(state.rows);
-  drawMiniProfile('riseCanvas','riseCard', state.rows, r=>r[10], '#e0a83f', 1);
-  drawMiniProfile('thetaECanvas','thetaECard', state.rows, r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
+  drawHodograph(getZoomedRows());
+  drawMiniProfile('riseCanvas','riseCard', getZoomedRows(), r=>r[10], '#e0a83f', 1);
+  drawMiniProfile('thetaECanvas','thetaECard', getZoomedRows(), r=>thetaE(r[3], r[5], r[2]), '#c76bd1', 0);
   if(document.getElementById('mapFallbackCanvas').style.display === 'block'){
     const useFull = Array.isArray(state.fullTrail) && state.fullTrail.length >= 2;
     const trail = useFull ? state.fullTrail : state.rows.filter(r=>r[8]!=null && r[9]!=null).map(r=>[r[8], r[9], r[1]]);
