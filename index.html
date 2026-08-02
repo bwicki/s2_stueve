@@ -127,14 +127,16 @@
   .stat-hover-tip{display:none;position:fixed;z-index:30;width:220px;
     background:rgba(10,14,20,.97);border:1px solid var(--amber);border-radius:6px;padding:9px 11px;
     font-family:var(--mono);font-size:10.5px;color:#e3e9f2;line-height:1.5;box-shadow:0 6px 20px rgba(0,0,0,.4);}
-  .stat-hover-tip .more-link{color:var(--amber);cursor:pointer;font-weight:600;display:inline-block;margin-top:6px;}
+  .stat-hover-tip .more-link{color:var(--amber);cursor:pointer;font-weight:600;display:block;margin-top:6px;}
   .stat-hover-tip .more-link:hover{text-decoration:underline;}
 
   #infoModalOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:150;
     align-items:center;justify-content:center;padding:24px;}
   #infoModalBox{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
-    max-width:640px;max-height:85vh;overflow-y:auto;padding:26px 30px;position:relative;
-    box-shadow:0 16px 50px rgba(0,0,0,.5);font-family:var(--mono);color:var(--text);}
+    max-width:640px;max-height:85vh;overflow:hidden;padding:0;position:relative;
+    box-shadow:0 16px 50px rgba(0,0,0,.5);font-family:var(--mono);color:var(--text);
+    display:flex;flex-direction:column;}
+  #infoModalContent{overflow-y:auto;padding:50px 30px 26px;}
   #infoModalBox h2{font-size:16px;margin:0 26px 4px 0;color:var(--text-strong);}
   #infoModalBox .im-value{font-size:12px;color:var(--amber);margin-bottom:16px;}
   #infoModalBox h3{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);
@@ -144,12 +146,13 @@
   #infoModalBox .im-links a{color:var(--amber);text-decoration:none;}
   #infoModalBox .im-links a:hover{text-decoration:underline;}
   #infoModalBox .im-links li{margin-bottom:4px;}
-  #infoModalClose, #infoModalPdf{position:absolute;top:16px;width:26px;height:26px;border-radius:6px;
+  #infoModalClose, #infoModalPdf{position:absolute;top:14px;width:28px;height:28px;border-radius:6px;
     border:1px solid var(--line);background:var(--panel);color:var(--text-dim);cursor:pointer;
-    display:flex;align-items:center;justify-content:center;font-size:14px;}
-  #infoModalClose{right:16px;}
+    display:flex;align-items:center;justify-content:center;font-size:14px;z-index:2;}
+  #infoModalClose{right:14px;background:#c9463a;border-color:#c9463a;color:#fff;font-weight:700;}
+  #infoModalClose:hover{background:#a8362c;border-color:#a8362c;color:#fff;}
   #infoModalPdf{right:50px;font-size:13px;}
-  #infoModalClose:hover, #infoModalPdf:hover{color:var(--amber);border-color:var(--amber);}
+  #infoModalPdf:hover{color:var(--amber);border-color:var(--amber);}
   #infoModalBox table.im-table{border-collapse:collapse;font-size:11.5px;margin:6px 0;width:100%;}
   #infoModalBox table.im-table td, #infoModalBox table.im-table th{border:1px solid var(--line);
     padding:4px 8px;text-align:left;}
@@ -192,6 +195,7 @@
       background:none !important;padding:0 !important;}
     body.printing-info-modal #infoModalBox{max-width:none !important;max-height:none !important;
       box-shadow:none !important;border:none !important;overflow:visible !important;}
+    body.printing-info-modal #infoModalContent{overflow:visible !important;padding:0 !important;}
     body.printing-info-modal #infoModalClose, body.printing-info-modal #infoModalPdf{display:none !important;}
     .section-title{margin:6px 0 3px;font-size:8px;}
     #graphVariablesTitle{display:none !important;}
@@ -346,11 +350,11 @@
       <div class="title-block">
         <div class="eyebrow">S2/RR4 Radiosonde Telemetry</div>
         <h1><a href="https://sparv.io/" target="_blank" rel="noopener" class="title-link">Stüve Diagram from S2/RR4 Sonde Data</a></h1>
-        <p id="subtitle">Please load Radiosonde ascent data … · v61 (2026-08-02)</p>
+        <p id="subtitle">Please load Radiosonde ascent data … · v63 (2026-08-02)</p>
         <p style="margin:2px 0 0;font-size:12px;color:var(--text-dim);font-family:var(--mono);
           display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span id="launchLoc"></span>
-          <span>· v61 (2026-08-02)</span>
+          <span id="headerVersionStamp" style="visibility:hidden;">· v63 (2026-08-02)</span>
         </p>
       </div>
       <img class="header-logo" alt="Wicki Partners Ballonteam"
@@ -459,12 +463,13 @@
   <div class="stat-strip" id="statStrip"></div>
   <div class="section-title">Flight Analytics</div>
   <div class="stat-strip" id="thermoStrip" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr));"></div>
-  <div class="section-title" style="display:flex;align-items:center;gap:6px;">Analytical Comments
-    <button class="stat-info-btn" data-info-key="analyticalComments" style="position:static;"></button>
-  </div>
+  <div class="section-title">Analytical Comments</div>
   <div id="analyticalComments" style="background:var(--panel);border:1px solid var(--line);border-radius:8px;
       padding:12px 16px;margin-bottom:18px;font-family:var(--mono);font-size:12px;
-      display:flex;flex-direction:column;gap:8px;"></div>
+      position:relative;">
+    <button class="stat-info-btn" data-info-key="analyticalComments"></button>
+    <div id="analyticalCommentsList" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
 
   <div id="anomalyBanner" style="display:none;margin-bottom:16px;padding:10px 14px;background:rgba(224,85,74,.1);
       border:1px solid #e0554a;border-radius:8px;font-family:var(--mono);font-size:12px;color:var(--text);">
@@ -798,6 +803,20 @@ function altitudeAtPressure(rows, pHpa){
     const topTK = top[3]+273.15;
     const scaleHeight = 287.05*topTK/9.80665;
     return top[1] - scaleHeight*Math.log(pHpa/top[2]);
+  }
+  return null;
+}
+
+// Inverse of altitudeAtPressure: interpolates pressure at a given target
+// altitude (m MSL) from the real sounding data. Used to place the
+// transition-altitude marker on the Y axis.
+function pressureAtAltitude(rows, targetAltM){
+  for(let i=0;i<rows.length-1;i++){
+    const aA=rows[i][1], aB=rows[i+1][1];
+    if((targetAltM<=aA && targetAltM>=aB) || (targetAltM>=aA && targetAltM<=aB)){
+      const f = (targetAltM-aA)/((aB-aA)||1e-9);
+      return rows[i][2] + f*(rows[i+1][2]-rows[i][2]);
+    }
   }
   return null;
 }
@@ -1411,6 +1430,7 @@ function formatCoord(lat, lon){
 }
 let _geocodeToken = 0;
 async function updateLaunchLocation(rows){
+  document.getElementById('headerVersionStamp').style.visibility = 'visible';
   const el = document.getElementById('launchLoc');
   const coord = firstCoord(rows);
   const myToken = ++_geocodeToken;
@@ -2011,7 +2031,7 @@ function computeAnalyticalComments(rows, ctx){
 }
 
 function renderAnalyticalComments(rows, ctx){
-  const el = document.getElementById('analyticalComments');
+  const el = document.getElementById('analyticalCommentsList');
   const comments = computeAnalyticalComments(rows, ctx);
   const dotColor = {green:'#3fae5a', yellow:'#e0b23f', red:'#e0554a', gray:'#8a95a6'};
   el.innerHTML = comments.map(c=>
@@ -2337,6 +2357,29 @@ function draw(rows){
     const alt = altitudeAtPressure(rows, p);
     if(alt!=null){
       ctx.fillText(formatAltitude(alt, groundAltM), pad.left-48, y);
+    }
+  }
+  // small transition-altitude marker on the axis, when displaying Flight Levels
+  if(state.altitudeUnit === 'fl' && state.transitionAltFt){
+    const taAltM = state.transitionAltFt/3.28084;
+    const taP = pressureAtAltitude(rows, taAltM);
+    if(taP!=null){
+      const yTA = yScale(yOf(taP));
+      if(yTA >= pad.top-2 && yTA <= pad.top+plotH+2){
+        ctx.fillStyle = cv('--amber');
+        ctx.font = '8px IBM Plex Mono, monospace';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        ctx.fillText('TA ▸', pad.left-6, yTA);
+        ctx.strokeStyle = cv('--amber');
+        ctx.lineWidth = 1;
+        ctx.setLineDash([1.5,1.5]);
+        ctx.beginPath();
+        ctx.moveTo(pad.left-52, yTA);
+        ctx.lineTo(pad.left-4, yTA);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = cText;
+      }
     }
   }
   // explicit label at the very top of the axis (the extended headroom band
@@ -3482,8 +3525,10 @@ function highlightCrossPanels(row){
       const c = document.getElementById('mapCursorOverlay');
       const octx = c.getContext('2d');
       if(LEAFLET_MAP && typeof L !== 'undefined'){
-        const pt = LEAFLET_MAP.latLngToContainerPoint([best[0], best[1]]);
-        paintSecondaryMarker(octx, pt.x, pt.y, 5);
+        try{
+          const pt = LEAFLET_MAP.latLngToContainerPoint([best[0], best[1]]);
+          paintSecondaryMarker(octx, pt.x, pt.y, 5);
+        }catch(err){ /* map not fully initialized yet — skip this frame */ }
       } else if(MAP_FALLBACK_PROJECT){
         paintSecondaryMarker(octx, MAP_FALLBACK_PROJECT.X(best[1]), MAP_FALLBACK_PROJECT.Y(best[0]), 5);
       }
@@ -3808,7 +3853,7 @@ document.getElementById('mapExpandBtn').addEventListener('click', ()=>{
 <body>
   <div id="hdr">
     <span class="title">${title.replace(/</g,'')}</span>
-    <button id="osmBtn">Open in OSM ↗</button>
+    <button id="osmBtn" title="OSM's website can't render an arbitrary custom track, so this centers the map on the flight instead">Center in OSM ↗</button>
     <button id="geBtn">Open in Google Earth ↗</button>
   </div>
   <div id="map"></div>
@@ -4016,12 +4061,16 @@ document.getElementById('sondehubSendBtn').addEventListener('click', async ()=>{
   statusEl.textContent = 'Sending telemetry…';
 
   try{
-    // Thin to a reasonable point count — SondeHub is built for streaming
+    // Filter to GPS-tagged rows first (GPS fixes update less often than the
+    // other sensors in this data — thinning before filtering would throw
+    // away most of the budget on rows that get dropped anyway), then thin
+    // that to a reasonable point count — SondeHub is built for streaming
     // telemetry at typical sonde rates (~1 point/sec), not necessarily a
     // single bulk request with every 1 Hz sample from a full flight.
-    const thinned = thinForShare(state.rows, 600);
+    const gpsRows = state.rows.filter(r=>r[8]!=null && r[9]!=null);
+    const thinned = thinForShare(gpsRows, 600);
     const nowIso = new Date().toISOString();
-    const packets = thinned.filter(r=>r[8]!=null && r[9]!=null).map(r=>{
+    const packets = thinned.map(r=>{
       const iso = r[0].replace(' ', 'T')+'Z';
       const pkt = {
         software_name: 'Stueve-Diagram-Tool',

@@ -1,4 +1,4 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde (v61)
+# Stüve Diagram Tool — S2/RR4 Radiosonde (v63)
 
 > **License:** This project uses a custom, non-standard license (see
 > `LICENSE`). Using the app is permitted, but modifying, redistributing, or
@@ -65,7 +65,13 @@ static page (e.g. GitHub Pages).
 - Adds a hodograph, a rise-speed profile, a Theta-E profile, and a
   flight-path map as separate panels, each individually exportable as PNG.
   The flight-path map can also be opened full-size in a new window (⛶),
-  with the flight still drawn
+  with the flight still drawn, plus "Center in OSM" (opens openstreetmap.org
+  centered on the flight — OSM's website has no way to render an arbitrary
+  custom track, so this is the closest it supports) and "Open in Google
+  Earth" (downloads a KML of the flight and opens Google Earth Web, ready
+  to import it via the ☰ menu — Google Earth Web also has no URL format for
+  loading arbitrary external data, so this two-step flow is the correct way
+  to get it in)
 - Lets you load your own CSV (`..._raw_flight_history.csv` format), compare
   multiple flights, save flights locally in the browser (with a proper list
   view, not just a dropdown), export CSV/PNG (each PNG stamped with the
