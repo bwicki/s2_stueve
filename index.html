@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stüve Diagram from S2/RR4 Sonde Data</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%20fill%3D%22%231a1611%22/%3E%3Cline%20x1%3D%224%22%20y1%3D%226%22%20x2%3D%2228%22%20y2%3D%2228%22%20stroke%3D%22%23e0a83f%22%20stroke-width%3D%221.4%22%20opacity%3D%220.55%22/%3E%3Cline%20x1%3D%224%22%20y1%3D%2214%22%20x2%3D%2220%22%20y2%3D%2228%22%20stroke%3D%22%23e0a83f%22%20stroke-width%3D%221.4%22%20opacity%3D%220.55%22/%3E%3Cline%20x1%3D%224%22%20y1%3D%2222%22%20x2%3D%2212%22%20y2%3D%2228%22%20stroke%3D%22%23e0a83f%22%20stroke-width%3D%221.4%22%20opacity%3D%220.55%22/%3E%3Cpath%20d%3D%22M7%205%20L11%2015%20L17%2012%20L21%2025%22%20fill%3D%22none%22%20stroke%3D%22%23e0554a%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%20fill%3D%22%23f4f1ea%22/%3E%3Cline%20x1%3D%224%22%20y1%3D%226%22%20x2%3D%2228%22%20y2%3D%2228%22%20stroke%3D%22%23e0a83f%22%20stroke-width%3D%221.4%22%20opacity%3D%220.6%22/%3E%3Cline%20x1%3D%224%22%20y1%3D%2214%22%20x2%3D%2220%22%20y2%3D%2228%22%20stroke%3D%22%23e0a83f%22%20stroke-width%3D%221.4%22%20opacity%3D%220.6%22/%3E%3Cline%20x1%3D%224%22%20y1%3D%2222%22%20x2%3D%2212%22%20y2%3D%2228%22%20stroke%3D%22%23e0a83f%22%20stroke-width%3D%221.4%22%20opacity%3D%220.6%22/%3E%3Cpath%20d%3D%22M7%205%20L11%2015%20L17%2012%20L21%2025%22%20fill%3D%22none%22%20stroke%3D%22%23e0554a%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -107,7 +107,6 @@
     border-radius:6px; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,.2);
   }
   .export-icon-btn:hover{background:var(--amber); color:#1a1200;}
-  #welcomeProgressBar{transition: width 15s linear;}
   #windPanelHandle:hover > div{opacity:1; width:6px;}
   .section-title{font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:.08em;
     text-transform:uppercase;margin:14px 0 6px;font-weight:600;}
@@ -128,12 +127,12 @@
   .chart-wrap{position:relative;width:100%;}
   canvas{display:block;width:100%;}
 
-  #tooltip, #hodoTooltip{position:absolute;pointer-events:none;background:rgba(10,14,20,.95);border:1px solid var(--amber);
+  #tooltip, #hodoTooltip, .mini-tooltip{position:absolute;pointer-events:none;background:rgba(10,14,20,.95);border:1px solid var(--amber);
     border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:11.5px;color:#e3e9f2;
     display:none;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.4);z-index:5;line-height:1.5;}
-  #tooltip .row{display:flex;justify-content:space-between;gap:14px;}
-  #tooltip .lbl{color:#8b97ab;}
-  #tooltip .hdr{color:#f0a63d;margin-bottom:4px;font-size:11px;}
+  #tooltip .row, .mini-tooltip .row{display:flex;justify-content:space-between;gap:14px;}
+  #tooltip .lbl, .mini-tooltip .lbl{color:#8b97ab;}
+  #tooltip .hdr, .mini-tooltip .hdr{color:#f0a63d;margin-bottom:4px;font-size:11px;}
 
   .legend{display:flex;flex-wrap:wrap;gap:5px 12px;padding:10px 2px 2px;margin-top:10px;
     border-top:1px solid var(--line);font-family:var(--mono);font-size:10px;color:var(--text-dim);line-height:1.3;}
@@ -158,7 +157,7 @@
     #analyticalComments span[style*="border-radius:50%"]{width:7px !important;height:7px !important;margin-top:1px !important;}
     @page{ size: A4 portrait; margin: 8mm; }
     html,body{background:#fff;}
-    .controls, #tooltip, #hodoTooltip, .file-btn, #compareList, #scrubber-row, #anomalyBanner, #altRangeCol{display:none !important;}
+    .controls, #tooltip, #hodoTooltip, .mini-tooltip, .file-btn, #compareList, #scrubber-row, #anomalyBanner, #altRangeCol{display:none !important;}
     .app{max-width:none;padding:0;}
     header{border-bottom:1px solid #999;padding-bottom:6px;margin-bottom:8px;gap:4px;}
     .header-logo{height:36px;}
@@ -179,7 +178,7 @@
     #panelsRow > div{min-width:0 !important;flex:none !important;}
     #hodoCard > div:first-child, #riseCard > div:first-child,
     #thetaECard > div:first-child, #mapCard > div:first-child{font-size:7.5px;margin-bottom:4px !important;}
-    .panel-export-btn, #mapExportBtn, #exportPngBtn, #windPanelHandle, #printModalOverlay, #welcomeOverlay{display:none !important;}
+    .panel-export-btn, #mapExportBtn, #mapExpandBtn, #exportPngBtn, #windPanelHandle, #printModalOverlay, #welcomeOverlay, #chartCursorOverlay{display:none !important;}
     html.print-no-panels #panelsRow{display:none !important;}
     .legend{gap:2px 8px;padding:5px 2px 1px;font-size:7px;line-height:1.15;}
     .swatch{width:10px;border-top-width:1.6px;}
@@ -200,7 +199,7 @@
 <div class="app">
   <div id="welcomeOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
       z-index:200;align-items:center;justify-content:center;">
-    <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+    <div id="welcomeBox" style="background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
         padding:22px 26px;font-family:var(--mono);color:var(--text);max-width:420px;
         box-shadow:0 12px 40px rgba(0,0,0,.4);position:relative;">
       <button id="welcomeCloseBtn" title="Close" style="position:absolute;top:10px;right:10px;
@@ -231,7 +230,7 @@
         <p style="margin:2px 0 0;font-size:12px;color:var(--text-dim);font-family:var(--mono);
           display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span id="launchLoc"></span>
-          <span>· v51 (2026-08-02)</span>
+          <span>· v54 (2026-08-02)</span>
         </p>
       </div>
       <img class="header-logo" alt="Wicki Partners Ballonteam"
@@ -299,6 +298,9 @@
             <span><b>T</b></span><span>Toggle light/dark</span>
             <span><b>E</b></span><span>Export CSV</span>
             <span><b>L</b></span><span>Create link</span>
+          </div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:10.5px;color:var(--text-dim);max-width:220px;white-space:normal;line-height:1.4;">
+            Click the time scrubber or the zoom handles, then use ← → (or ↑ ↓) for fine, one-step adjustments.
           </div>
         </div>
         </div>
@@ -427,6 +429,7 @@
       </div>
       <div class="chart-wrap" style="flex:1;">
         <canvas id="chart"></canvas>
+        <canvas id="chartCursorOverlay" style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
         <div id="tooltip"></div>
         <div id="windPanelHandle" title="Drag to resize the wind speed panel"
           style="position:absolute;width:14px;margin-left:-7px;cursor:ew-resize;
@@ -470,7 +473,10 @@
           <button class="reset-btn panel-export-btn export-icon-btn" data-canvas="riseCanvas" data-suffix="rise-speed"
             title="Export PNG">⬇</button>
         </div>
-        <canvas id="riseCanvas" style="display:block;width:100%;"></canvas>
+        <div style="position:relative;">
+          <canvas id="riseCanvas" style="display:block;width:100%;"></canvas>
+          <div id="riseTooltip" class="mini-tooltip"></div>
+        </div>
       </div>
       <div id="thetaECard" style="display:none;flex:1;min-width:220px;background:var(--panel-2);
           border:1px solid var(--line);border-radius:8px;padding:12px;">
@@ -480,14 +486,20 @@
           <button class="reset-btn panel-export-btn export-icon-btn" data-canvas="thetaECanvas" data-suffix="theta-e"
             title="Export PNG">⬇</button>
         </div>
-        <canvas id="thetaECanvas" style="display:block;width:100%;"></canvas>
+        <div style="position:relative;">
+          <canvas id="thetaECanvas" style="display:block;width:100%;"></canvas>
+          <div id="thetaETooltip" class="mini-tooltip"></div>
+        </div>
       </div>
       <div id="mapCard" style="display:none;flex:1;min-width:220px;background:var(--panel-2);
           border:1px solid var(--line);border-radius:8px;padding:12px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <div style="font-family:var(--mono);font-size:10.5px;color:var(--text-dim);letter-spacing:.06em;
             text-transform:uppercase;">Flight path</div>
-          <button class="reset-btn export-icon-btn" id="mapExportBtn" title="Export PNG (schematic plot)">⬇</button>
+          <div style="display:flex;gap:4px;">
+            <button class="reset-btn export-icon-btn" id="mapExpandBtn" title="Open larger map in a new window">⛶</button>
+            <button class="reset-btn export-icon-btn" id="mapExportBtn" title="Export PNG (schematic plot)">⬇</button>
+          </div>
         </div>
         <div id="mapContainer" style="width:100%;border-radius:6px;overflow:hidden;background:var(--panel);"></div>
         <canvas id="mapFallbackCanvas" style="display:none;width:100%;"></canvas>
@@ -678,11 +690,23 @@ function altitudeUnitSuffix(unit){
     default: return ' m MSL';
   }
 }
+// General default transition altitude for the FL display below (in feet).
+// Switzerland's actual transition altitude varies by region (commonly
+// 5000-7000 ft in lowland areas, up to FL100/130 in Alpine sectors per the
+// Swiss AIP) — this is a single representative default, not a lookup for
+// the specific launch site's airspace.
+const TRANSITION_ALT_FT = 5000;
+
 function formatAltitude(altM, groundAltM){
   const unit = state.altitudeUnit || 'amsl';
   const v = formatAltitudeValue(altM, groundAltM, unit);
   if(v==null) return 'n/a';
-  return unit==='fl' ? ('FL'+String(v).padStart(3,'0')) : (v + altitudeUnitSuffix(unit));
+  if(unit==='fl'){
+    const ft = Math.round(altM*3.28084);
+    const flLabel = 'FL'+String(v).padStart(3,'0');
+    return ft < TRANSITION_ALT_FT ? `${flLabel} (≈${ft} ft, below TA)` : flLabel;
+  }
+  return v + altitudeUnitSuffix(unit);
 }
 
 function satVaporPressure(Tc){ return 6.112*Math.exp(17.67*Tc/(Tc+243.5)); } // hPa, Bolton
@@ -1298,18 +1322,25 @@ function renderStats(rows){
     `Ascent ${s.t0} UTC · ${Math.round(s.maxAlt)} m MSL peak altitude · ${state.source} · all times in UTC`;
 }
 
-function renderThermo(rows){
+function buildAnalyticsCtx(rows){
   const t = computeThermo(rows);
-  const el = document.getElementById('thermoStrip');
-  if(!t){ el.innerHTML=''; return; }
+  if(!t) return null;
   const k = computeKIndex(rows);
   const stormPct = kIndexToProbabilityPct(k);
   const cloudPct = estimateCloudCoverPct(rows);
   const shearKt = computeWindShear(rows);
   const dcape = computeDCAPE(rows);
   const pw = computePW(rows);
-
   const groundAltM = rows[0][1];
+  return {t, k, stormPct, cloudPct, shearKt, dcape, pw, groundAltM};
+}
+
+function renderThermo(rows){
+  const el = document.getElementById('thermoStrip');
+  const ctx = buildAnalyticsCtx(rows);
+  if(!ctx){ el.innerHTML=''; return; }
+  const {t, k, stormPct, cloudPct, shearKt, dcape, pw, groundAltM} = ctx;
+
   function formatLayers(layers){
     if(layers.length === 0) return 'none detected';
     const alts = layers.map(l => formatAltitude(altitudeAtPressure(rows, (l.p0+l.p1)/2), groundAltM));
@@ -1336,12 +1367,11 @@ function renderThermo(rows){
   el.innerHTML = items.map(([k,v])=>
     `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
 
-  renderAnalyticalComments(rows, {t, k, stormPct, dcape, shearKt, groundAltM, cloudPct, pw});
+  renderAnalyticalComments(rows, ctx);
 }
 
-function renderAnalyticalComments(rows, ctx){
+function computeAnalyticalComments(rows, ctx){
   const {t, k, stormPct, dcape, shearKt, groundAltM, cloudPct, pw} = ctx;
-  const el = document.getElementById('analyticalComments');
   const comments = [];
 
   // ---- Rain risk (general/stratiform: moisture + cloud cover based) ----
@@ -1404,6 +1434,12 @@ function renderAnalyticalComments(rows, ctx){
     comments.push({level, text});
   }
 
+  return comments;
+}
+
+function renderAnalyticalComments(rows, ctx){
+  const el = document.getElementById('analyticalComments');
+  const comments = computeAnalyticalComments(rows, ctx);
   const dotColor = {green:'#3fae5a', yellow:'#e0b23f', red:'#e0554a', gray:'#8a95a6'};
   el.innerHTML = comments.map(c=>
     `<div style="display:flex;gap:10px;align-items:flex-start;">
@@ -1476,6 +1512,13 @@ function layoutChart(rows){
   canvas.width = cssWidth*dpr;
   canvas.height = cssHeight*dpr;
   canvas.style.height = cssHeight+'px';
+  const cursorOverlay = document.getElementById('chartCursorOverlay');
+  if(cursorOverlay){
+    cursorOverlay.width = canvas.width;
+    cursorOverlay.height = canvas.height;
+    cursorOverlay.style.width = cssWidth+'px';
+    cursorOverlay.style.height = cssHeight+'px';
+  }
   const altMinEl = document.getElementById('altRangeMin'), altMaxEl = document.getElementById('altRangeMax');
   if(altMinEl){
     const trackH = document.getElementById('altRangeTrack').clientHeight;
@@ -2342,7 +2385,9 @@ function drawMiniProfile(canvasId, cardId, rows, getValue, color, unitDecimals){
     const v = xMin + (xMax-xMin)*(s/steps);
     mctx.fillText(v.toFixed(unitDecimals), xScale2(v), pad.top+plotH+6);
   }
-  return {pad, plotW, plotH, xMin, xMax, yMin, yMax, xScale: xScale2, yScale: yScale2, pts};
+  const result = {pad, plotW, plotH, xMin, xMax, yMin, yMax, xScale: xScale2, yScale: yScale2, pts, rows};
+  MINI_PLOTS[canvasId] = result;
+  return result;
 }
 
 // ---------- Flight-path map (Leaflet + OpenStreetMap tiles) ----------
@@ -2566,6 +2611,7 @@ function drawHodograph(rows){
   HODO_PLOT = {cx, cy, scale, pts};
 }
 let HODO_PLOT = null;
+let MINI_PLOTS = {};
 
 const hodoTooltip = document.getElementById('hodoTooltip');
 document.getElementById('hodoCanvas').addEventListener('mousemove', (e)=>{
@@ -2594,6 +2640,36 @@ document.getElementById('hodoCanvas').addEventListener('mousemove', (e)=>{
   `;
 });
 document.getElementById('hodoCanvas').addEventListener('mouseleave', ()=>{ hodoTooltip.style.display='none'; });
+
+function setupMiniProfileTooltip(canvasId, tooltipId, unitLabel, unitDecimals){
+  const canvas2 = document.getElementById(canvasId);
+  const tip = document.getElementById(tooltipId);
+  canvas2.addEventListener('mousemove', (e)=>{
+    const plot = MINI_PLOTS[canvasId];
+    if(!plot) return;
+    const rect = canvas2.getBoundingClientRect();
+    const mx = e.clientX-rect.left, my = e.clientY-rect.top;
+    let best=-1, bestD=Infinity;
+    plot.pts.forEach((p,i)=>{
+      const y = plot.yScale(p.y);
+      const d = Math.abs(y-my);
+      if(d<bestD){bestD=d;best=i;}
+    });
+    if(best<0) return;
+    const p = plot.pts[best];
+    tip.style.display = 'block';
+    tip.style.left = Math.min(mx+14, rect.width-150)+'px';
+    tip.style.top = Math.max(my-46,4)+'px';
+    tip.innerHTML = `
+      <div class="hdr">${Math.round(pOf(p.y))} hPa</div>
+      <div class="row"><span class="lbl">${unitLabel}</span><span>${p.v.toFixed(unitDecimals)}</span></div>
+    `;
+  });
+  canvas2.addEventListener('mouseleave', ()=>{ tip.style.display='none'; });
+}
+setupMiniProfileTooltip('riseCanvas', 'riseTooltip', 'Rise speed', 1);
+setupMiniProfileTooltip('thetaECanvas', 'thetaETooltip', 'Theta-E', 0);
+
 
 
 function nearestPoint(mx,my){
@@ -2632,12 +2708,13 @@ canvas.addEventListener('mousemove', (e)=>{
         <div class="row"><span class="lbl">Pressure</span><span>${r[2].toFixed(1)} hPa</span></div>
         <div class="row"><span class="lbl">Wind</span><span>${msToKt(r[6]).toFixed(0)} kt / ${windFromDeg(r[7]).toFixed(0)}°</span></div>
       `;
+      clearChartCursorDot();
       return;
     }
   }
 
   const pt = nearestPoint(mx,my);
-  if(!pt){ tooltip.style.display='none'; return; }
+  if(!pt){ tooltip.style.display='none'; clearChartCursorDot(); return; }
   tooltip.style.display='block';
   tooltip.style.left = Math.min(mx+16, rect.width-190)+'px';
   tooltip.style.top = Math.max(my-70,4)+'px';
@@ -2650,8 +2727,34 @@ canvas.addEventListener('mousemove', (e)=>{
     <div class="row"><span class="lbl">RH</span><span>${pt[4].toFixed(0)} %</span></div>
     ${pt[6]!=null && pt[7]!=null ? `<div class="row"><span class="lbl">Wind</span><span>${msToKt(pt[6]).toFixed(0)} kt / ${windFromDeg(pt[7]).toFixed(0)}°</span></div>` : ''}
   `;
+  if(PLOT){
+    const dotX = PLOT.xScale(pt[3]), dotY = PLOT.yScale(yOf(pt[2]));
+    drawChartCursorDot(dotX, dotY);
+  }
 });
-canvas.addEventListener('mouseleave', ()=>{ tooltip.style.display='none'; });
+canvas.addEventListener('mouseleave', ()=>{ tooltip.style.display='none'; clearChartCursorDot(); });
+
+function clearChartCursorDot(){
+  const c = document.getElementById('chartCursorOverlay');
+  if(!c) return;
+  const octx = c.getContext('2d');
+  octx.clearRect(0,0,c.width,c.height);
+}
+function drawChartCursorDot(x,y){
+  const c = document.getElementById('chartCursorOverlay');
+  if(!c) return;
+  const dpr = window.devicePixelRatio || 1;
+  const octx = c.getContext('2d');
+  octx.setTransform(dpr,0,0,dpr,0,0);
+  octx.clearRect(0,0,c.width/dpr,c.height/dpr);
+  octx.fillStyle = '#e0392b';
+  octx.strokeStyle = '#ffffff';
+  octx.lineWidth = 1.4;
+  octx.beginPath();
+  octx.arc(x, y, 4.5, 0, Math.PI*2);
+  octx.fill();
+  octx.stroke();
+}
 
 function renderAll(){
   showDataView();
@@ -2731,6 +2834,14 @@ document.getElementById('exportBtn').addEventListener('click', ()=>{
     lines.push('# Freezing level: '+(t.freezeAlt!=null?Math.round(t.freezeAlt)+' m MSL':'not in sounding'));
     lines.push('# Tropopause: '+(t.tropoAlt!=null?Math.round(t.tropoAlt)+' m MSL':'not reached'));
   }
+  const analyticsCtx = buildAnalyticsCtx(rows);
+  if(analyticsCtx){
+    lines.push('#');
+    lines.push('# Analytical Comments (automated, qualitative — not an official forecast):');
+    computeAnalyticalComments(rows, analyticsCtx).forEach(c=>{
+      lines.push(`#   [${c.level.toUpperCase()}] ${c.text}`);
+    });
+  }
   lines.push('utc_time,altitude_m_msl,pressure_hPa,temperature_C,dewpoint_C,relative_humidity_pct,wind_speed_kt,wind_direction_from_deg');
   rows.forEach(r=>{
     const windKt = r[6]!=null ? msToKt(r[6]).toFixed(1) : '';
@@ -2770,9 +2881,16 @@ function exportCanvasPng(canvasId, suffix){
     const src = document.getElementById(canvasId);
     const dpr = window.devicePixelRatio || 1;
     const headerH = Math.round(34*dpr);
+
+    const includeComments = (canvasId === 'chart');
+    const analyticsCtx = includeComments ? buildAnalyticsCtx(state.rows) : null;
+    const comments = analyticsCtx ? computeAnalyticalComments(state.rows, analyticsCtx) : [];
+    const lineH = Math.round(20*dpr);
+    const commentsH = comments.length ? (Math.round(10*dpr) + comments.length*lineH + Math.round(6*dpr)) : 0;
+
     const out = document.createElement('canvas');
     out.width = src.width;
-    out.height = src.height + headerH;
+    out.height = src.height + headerH + commentsH;
     const octx = out.getContext('2d');
     octx.fillStyle = '#ffffff';
     octx.fillRect(0,0,out.width,out.height);
@@ -2794,6 +2912,28 @@ function exportCanvasPng(canvasId, suffix){
     octx.stroke();
 
     octx.drawImage(src, 0, headerH);
+
+    if(comments.length){
+      const dotColor = {green:'#3fae5a', yellow:'#c99a2e', red:'#c9463a', gray:'#8a95a6'};
+      const baseY = headerH + src.height + Math.round(10*dpr);
+      octx.font = `${Math.round(11*dpr)}px IBM Plex Mono, monospace`;
+      octx.textBaseline = 'middle';
+      comments.forEach((c,i)=>{
+        const y = baseY + i*lineH + lineH/2;
+        octx.fillStyle = dotColor[c.level] || '#8a95a6';
+        octx.beginPath();
+        octx.arc(12*dpr + 4*dpr, y, 4*dpr, 0, Math.PI*2);
+        octx.fill();
+        octx.fillStyle = '#2a2419';
+        octx.textAlign = 'left';
+        octx.fillText(c.text, 12*dpr + 14*dpr, y);
+      });
+      octx.strokeStyle = '#ddd';
+      octx.beginPath();
+      octx.moveTo(0, headerH+src.height+0.5);
+      octx.lineTo(out.width, headerH+src.height+0.5);
+      octx.stroke();
+    }
 
     out.toBlob(blob=>{
       const url = URL.createObjectURL(blob);
@@ -2893,6 +3033,86 @@ function exportMapPng(){
   }, 'image/png');
 }
 document.getElementById('mapExportBtn').addEventListener('click', exportMapPng);
+
+document.getElementById('mapExpandBtn').addEventListener('click', ()=>{
+  const useFull = Array.isArray(state.fullTrail) && state.fullTrail.length >= 2;
+  const trail = useFull ? state.fullTrail : state.rows.filter(r=>r[8]!=null && r[9]!=null).map(r=>[r[8], r[9], r[1]]);
+  if(trail.length < 2){ alert('No GPS track available.'); return; }
+  const title = `Flight path — Sonde ${state.sondeId||''} — ${state.rows[0][0]||''}`;
+  const trailJson = JSON.stringify(trail);
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>${title.replace(/</g,'')}</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
+<style>
+  html,body{margin:0;height:100%;background:#f4f1ea;font-family:-apple-system,'IBM Plex Mono',monospace;}
+  #map{position:absolute;top:36px;left:0;right:0;bottom:0;}
+  #hdr{height:36px;display:flex;align-items:center;padding:0 14px;font-size:13px;color:#2a2419;
+    border-bottom:1px solid #ddd6c5;box-sizing:border-box;}
+  #fallback{position:absolute;top:36px;left:0;right:0;bottom:0;}
+</style></head>
+<body>
+  <div id="hdr">${title.replace(/</g,'')}</div>
+  <div id="map"></div>
+  <canvas id="fallback" style="display:none;"></canvas>
+<script>
+  const trail = ${trailJson};
+  function drawFallback(){
+    document.getElementById('map').style.display='none';
+    const canvas = document.getElementById('fallback');
+    canvas.style.display = 'block';
+    const dpr = window.devicePixelRatio||1;
+    const w = window.innerWidth, h = window.innerHeight-36;
+    canvas.width = w*dpr; canvas.height = h*dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const pad=30;
+    const lats=trail.map(t=>t[0]), lons=trail.map(t=>t[1]);
+    const latMin=Math.min(...lats), latMax=Math.max(...lats);
+    const lonMin=Math.min(...lons), lonMax=Math.max(...lons);
+    const midLat=(latMin+latMax)/2, lonScale=Math.cos(midLat*Math.PI/180);
+    const ww=Math.max((lonMax-lonMin)*lonScale,1e-6), hh=Math.max(latMax-latMin,1e-6);
+    const plotW=w-2*pad, plotH=h-2*pad;
+    const scale=Math.min(plotW/ww, plotH/hh);
+    const cx=pad+(plotW-ww*scale)/2, cy=pad+(plotH-hh*scale)/2;
+    const X=lon=>cx+(lon-lonMin)*lonScale*scale, Y=lat=>cy+(latMax-lat)*scale;
+    ctx.strokeStyle='#e0554a'; ctx.lineWidth=2.5; ctx.beginPath();
+    trail.forEach((t,i)=>{ const x=X(t[1]),y=Y(t[0]); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+    ctx.stroke();
+    let topIdx=0;
+    for(let i=1;i<trail.length;i++) if(trail[i][2]>trail[topIdx][2]) topIdx=i;
+    function marker(t,color,ring){ const x=X(t[1]),y=Y(t[0]); ctx.fillStyle=color; ctx.beginPath();
+      ctx.arc(x,y,7,0,Math.PI*2); ctx.fill(); ctx.strokeStyle=ring; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(x,y,7,0,Math.PI*2); ctx.stroke(); }
+    marker(trail[0],'#3fae5a','#1a6b30');
+    marker(trail[trail.length-1],'#8fa0bd','#3a4a63');
+    ctx.font='28px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('💥', X(trail[topIdx][1]), Y(trail[topIdx][0]));
+  }
+  try{
+    if(typeof L === 'undefined') throw new Error('Leaflet not available');
+    const map = L.map('map', {zoomControl:true});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18, attribution:'&copy; OpenStreetMap'}).addTo(map);
+    const pts = trail.map(t=>[t[0],t[1]]);
+    const line = L.polyline(pts, {color:'#e0554a', weight:3}).addTo(map);
+    L.circleMarker(pts[0], {radius:8, color:'#1a6b30', weight:2, fillColor:'#3fae5a', fillOpacity:1}).addTo(map).bindTooltip('Launch / release');
+    let topIdx=0;
+    for(let i=1;i<trail.length;i++) if(trail[i][2]>trail[topIdx][2]) topIdx=i;
+    const burstIcon = L.divIcon({className:'', html:'<div style="font-size:30px;">💥</div>', iconSize:[34,34], iconAnchor:[17,17]});
+    L.marker(pts[topIdx], {icon:burstIcon}).addTo(map).bindTooltip('Highest point (burst) — '+Math.round(trail[topIdx][2])+' m MSL');
+    L.circleMarker(pts[pts.length-1], {radius:8, color:'#3a4a63', weight:2, fillColor:'#8fa0bd', fillOpacity:1}).addTo(map).bindTooltip('Last received position');
+    map.fitBounds(line.getBounds(), {padding:[30,30]});
+    setTimeout(()=>map.invalidateSize(), 100);
+  }catch(err){
+    drawFallback();
+  }
+<\/script>
+</body></html>`;
+  const w = window.open('', '_blank', 'width=1000,height=750');
+  if(!w){ alert('Please allow pop-ups to open the map in a new window.'); return; }
+  w.document.write(html);
+  w.document.close();
+});
 
 document.getElementById('exportPngBtn').addEventListener('click', ()=>{
   exportCanvasPng('chart', 'main');
@@ -3525,18 +3745,38 @@ function showDataView(){
 
 function showWelcomeOverlay(){
   const overlay = document.getElementById('welcomeOverlay');
+  const box = document.getElementById('welcomeBox');
   const bar = document.getElementById('welcomeProgressBar');
   overlay.style.display = 'flex';
-  // kick off the 15s progress-bar shrink on the next frame, so the CSS
-  // transition actually animates instead of jumping straight to 0
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{ bar.style.width = '0%'; });
-  });
-  const autoCloseTimer = setTimeout(hideWelcomeOverlay, 15000);
-  document.getElementById('welcomeCloseBtn').addEventListener('click', ()=>{
-    clearTimeout(autoCloseTimer);
+
+  const DURATION = 10000;
+  let remaining = DURATION;
+  let lastTick = performance.now();
+  let paused = false;
+  let rafId = null;
+  let closed = false;
+
+  function tick(now){
+    if(closed) return;
+    if(!paused){
+      remaining -= (now - lastTick);
+      if(remaining <= 0){ close(); return; }
+      bar.style.width = (remaining/DURATION*100)+'%';
+    }
+    lastTick = now;
+    rafId = requestAnimationFrame(tick);
+  }
+  rafId = requestAnimationFrame(tick);
+
+  box.addEventListener('mouseenter', ()=>{ paused = true; });
+  box.addEventListener('mouseleave', ()=>{ paused = false; lastTick = performance.now(); });
+
+  function close(){
+    closed = true;
+    if(rafId) cancelAnimationFrame(rafId);
     hideWelcomeOverlay();
-  });
+  }
+  document.getElementById('welcomeCloseBtn').addEventListener('click', close);
 }
 function hideWelcomeOverlay(){
   document.getElementById('welcomeOverlay').style.display = 'none';

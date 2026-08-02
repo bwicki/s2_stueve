@@ -1,4 +1,4 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde (v50)
+# Stüve Diagram Tool — S2/RR4 Radiosonde (v54)
 
 A self-contained, single-file web app for visualizing radiosonde ascent data
 (Stüve diagram, Emagram, or Skew-T) from the S2/RR4 system. No installation,
@@ -15,13 +15,19 @@ static page (e.g. GitHub Pages).
 ## What it does
 
 - On first load, shows a short "quick start" popup (auto-dismisses after
-  15 seconds, or close it manually) explaining what the tool does
+  10 seconds — pauses while your cursor is on it — or close it manually)
+  explaining what the tool does
 - Plots temperature, dew point, and Theta-E against pressure/height on a
   Stüve, Emagram, or Skew-T background grid, with a configurable altitude
-  unit (m AMSL, m AGL, ft, or Flight Level) shown on its own axis column
-- Hovering the chart shows a tooltip with the readings at that exact
-  height, in the currently selected altitude unit — anywhere over the
-  chart, not just directly on a curve
+  unit (m AMSL, m AGL, ft, or Flight Level) shown on its own axis column.
+  When using Flight Level, altitudes below the (general default) transition
+  altitude also show the equivalent in feet, since FL isn't meaningful down
+  there in real aviation use
+- Hovering the chart shows a red dot marking exactly which point the
+  tooltip's numbers belong to, plus the tooltip itself — anywhere over the
+  chart, not just directly on a curve, and in the currently selected
+  altitude unit. The hodograph, rise-speed, and Theta-E panels have the
+  same kind of hover tooltip
 - Shades inversions, isothermal layers, and cloud layers continuously by
   relative humidity (configurable threshold, e.g. "shade from 70% RH")
 - Marks LCL, LFC, the freezing level, and the tropopause directly on the
@@ -34,12 +40,15 @@ static page (e.g. GitHub Pages).
   with its octas symbol
 - Includes a plain-language "Analytical Comments" section with a simple
   traffic-light read (🟢🟡🔴) on rain risk and thunderstorm risk, each on
-  its own line
+  its own line — also included in the CSV export (as comment lines) and the
+  main-chart PNG export (as an extra footer strip), not just shown in-app
 - Draws wind barbs (or, optionally, numeric wind direction labels) and a
   resizable wind-speed profile alongside the main chart — drag the handle
   between them to make the wind panel wider or narrower
 - Adds a hodograph, a rise-speed profile, a Theta-E profile, and a
-  flight-path map as separate panels, each individually exportable as PNG
+  flight-path map as separate panels, each individually exportable as PNG.
+  The flight-path map can also be opened full-size in a new window (⛶),
+  with the flight still drawn
 - Lets you load your own CSV (`..._raw_flight_history.csv` format), compare
   multiple flights, save flights locally in the browser (with a proper list
   view, not just a dropdown), export CSV/PNG (each PNG stamped with the
@@ -55,8 +64,7 @@ static page (e.g. GitHub Pages).
 
 ## Hosting it yourself
 
-1. Upload `index.html` (rename it to `index.html` if it isn't already) to
-   this repository.
+1. Upload `index.html` to this repository.
 2. In the repo settings, enable **GitHub Pages** for the branch/folder
    containing it.
 3. Open the resulting `https://<your-username>.github.io/<repo>/` URL.
@@ -116,15 +124,17 @@ printed page if one hasn't been created yet in that session.
 
 ## Browser/network notes
 
-- The flight-path map and the launch-location lookup need an internet
-  connection (they load OpenStreetMap tiles and use a free geocoding
-  service). Without one, coordinates and a schematic flight-path plot are
-  shown instead — nothing crashes, and the schematic plot can still be
-  exported as a PNG.
+- The flight-path map, its full-size popup window, and the launch-location
+  lookup need an internet connection (they load OpenStreetMap tiles and use
+  a free geocoding service). Without one, coordinates and a schematic
+  flight-path plot are shown instead — nothing crashes, and the schematic
+  plot can still be exported as a PNG or opened in the popup window.
 - Some corporate networks block third-party map tiles; the schematic
   fallback covers that case too.
 - "My flights" (local save/load) uses your browser's local storage, so
   saved flights are private to your device and browser.
+- Opening the flight-path map in a new window requires pop-ups to be
+  allowed for this page.
 
 ## Technical notes
 
@@ -135,6 +145,10 @@ printed page if one hasn't been created yet in that session.
   minimum-Theta-E level in the lowest 400 hPa, following the standard
   simplified approach (no entrainment). Precipitable water: column integral
   of the dewpoint-derived mixing ratio.
+- Flight Level is computed from true (geometric) altitude, not from a
+  pressure-altitude/QNE conversion. The transition-altitude threshold used
+  to trigger the "below TA" feet note is a single general default (5000 ft),
+  not a lookup for the specific launch site's actual airspace.
 - Only the ascent phase is analyzed (automatically detected up to the
   altitude maximum); descent is only used for the flight-path map.
 - The K-Index-based thunderstorm likelihood, the cloud-cover/METAR
