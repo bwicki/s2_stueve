@@ -1,4 +1,4 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde
+# Stüve Diagram Tool — S2/RR4 Radiosonde (v50)
 
 A self-contained, single-file web app for visualizing radiosonde ascent data
 (Stüve diagram, Emagram, or Skew-T) from the S2/RR4 system. No installation,
@@ -7,11 +7,21 @@ static page (e.g. GitHub Pages).
 
 **Live version:** https://bwicki.github.io/s2_stueve/
 
+> The version number in this title matches the "· vNN (date)" stamp shown
+> next to the launch location in the app's own header — check that stamp
+> against this README's title to confirm you're looking at matching
+> documentation for the file you have.
+
 ## What it does
 
+- On first load, shows a short "quick start" popup (auto-dismisses after
+  15 seconds, or close it manually) explaining what the tool does
 - Plots temperature, dew point, and Theta-E against pressure/height on a
   Stüve, Emagram, or Skew-T background grid, with a configurable altitude
   unit (m AMSL, m AGL, ft, or Flight Level) shown on its own axis column
+- Hovering the chart shows a tooltip with the readings at that exact
+  height, in the currently selected altitude unit — anywhere over the
+  chart, not just directly on a curve
 - Shades inversions, isothermal layers, and cloud layers continuously by
   relative humidity (configurable threshold, e.g. "shade from 70% RH")
 - Marks LCL, LFC, the freezing level, and the tropopause directly on the
@@ -23,7 +33,8 @@ static page (e.g. GitHub Pages).
   as a percentage and as the matching METAR abbreviation (SKC/FEW/SCT/BKN/OVC)
   with its octas symbol
 - Includes a plain-language "Analytical Comments" section with a simple
-  traffic-light read (🟢🟡🔴) on rain risk and thunderstorm risk separately
+  traffic-light read (🟢🟡🔴) on rain risk and thunderstorm risk, each on
+  its own line
 - Draws wind barbs (or, optionally, numeric wind direction labels) and a
   resizable wind-speed profile alongside the main chart — drag the handle
   between them to make the wind panel wider or narrower

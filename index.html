@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stüve Diagram from S2/RR4 Sonde Data</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%20fill%3D%22%231a1611%22/%3E%3Cline%20x1%3D%224%22%20y1%3D%226%22%20x2%3D%2228%22%20y2%3D%2228%22%20stroke%3D%22%23e0a83f%22%20stroke-width%3D%221.4%22%20opacity%3D%220.55%22/%3E%3Cline%20x1%3D%224%22%20y1%3D%2214%22%20x2%3D%2220%22%20y2%3D%2228%22%20stroke%3D%22%23e0a83f%22%20stroke-width%3D%221.4%22%20opacity%3D%220.55%22/%3E%3Cline%20x1%3D%224%22%20y1%3D%2222%22%20x2%3D%2212%22%20y2%3D%2228%22%20stroke%3D%22%23e0a83f%22%20stroke-width%3D%221.4%22%20opacity%3D%220.55%22/%3E%3Cpath%20d%3D%22M7%205%20L11%2015%20L17%2012%20L21%2025%22%20fill%3D%22none%22%20stroke%3D%22%23e0554a%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -106,6 +107,7 @@
     border-radius:6px; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,.2);
   }
   .export-icon-btn:hover{background:var(--amber); color:#1a1200;}
+  #welcomeProgressBar{transition: width 15s linear;}
   #windPanelHandle:hover > div{opacity:1; width:6px;}
   .section-title{font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:.08em;
     text-transform:uppercase;margin:14px 0 6px;font-weight:600;}
@@ -177,7 +179,7 @@
     #panelsRow > div{min-width:0 !important;flex:none !important;}
     #hodoCard > div:first-child, #riseCard > div:first-child,
     #thetaECard > div:first-child, #mapCard > div:first-child{font-size:7.5px;margin-bottom:4px !important;}
-    .panel-export-btn, #mapExportBtn, #exportPngBtn, #windPanelHandle, #printModalOverlay{display:none !important;}
+    .panel-export-btn, #mapExportBtn, #exportPngBtn, #windPanelHandle, #printModalOverlay, #welcomeOverlay{display:none !important;}
     html.print-no-panels #panelsRow{display:none !important;}
     .legend{gap:2px 8px;padding:5px 2px 1px;font-size:7px;line-height:1.15;}
     .swatch{width:10px;border-top-width:1.6px;}
@@ -196,6 +198,30 @@
 </head>
 <body>
 <div class="app">
+  <div id="welcomeOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+      z-index:200;align-items:center;justify-content:center;">
+    <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+        padding:22px 26px;font-family:var(--mono);color:var(--text);max-width:420px;
+        box-shadow:0 12px 40px rgba(0,0,0,.4);position:relative;">
+      <button id="welcomeCloseBtn" title="Close" style="position:absolute;top:10px;right:10px;
+          background:transparent;border:none;color:var(--text-dim);font-size:16px;cursor:pointer;
+          line-height:1;padding:4px 6px;">✕</button>
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;padding-right:20px;">
+        Stüve Diagram Tool — quick start</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.6;">
+        This tool draws a Stüve, Emagram, or Skew-T diagram from S2/RR4 radiosonde
+        ascent data. Load your own CSV, or explore the sample flight. Hover the
+        chart for readings at any height. Diagram type, altitude unit, and wind
+        display are adjustable just above the chart. Export, print, or share a
+        link once you're ready.
+      </div>
+      <div id="welcomeProgressTrack" style="height:2px;background:var(--line);border-radius:1px;
+          margin-top:16px;overflow:hidden;">
+        <div id="welcomeProgressBar" style="height:100%;background:var(--amber);width:100%;"></div>
+      </div>
+    </div>
+  </div>
+
   <header>
     <div class="header-top">
       <div class="title-block">
@@ -205,7 +231,7 @@
         <p style="margin:2px 0 0;font-size:12px;color:var(--text-dim);font-family:var(--mono);
           display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span id="launchLoc"></span>
-          <span>· v48 (2026-07-26)</span>
+          <span>· v51 (2026-08-02)</span>
         </p>
       </div>
       <img class="header-logo" alt="Wicki Partners Ballonteam"
@@ -2572,12 +2598,11 @@ document.getElementById('hodoCanvas').addEventListener('mouseleave', ()=>{ hodoT
 
 function nearestPoint(mx,my){
   if(!PLOT) return null;
-  const {rows,xScale,yScale} = PLOT;
+  const {rows,yScale} = PLOT;
   let best=-1, bestD=Infinity;
   for(let i=0;i<rows.length;i++){
-    const x = xScale(rows[i][3]);
     const y = yScale(yOf(rows[i][2]));
-    const d = (x-mx)*(x-mx)+(y-my)*(y-my);
+    const d = Math.abs(y-my);
     if(d<bestD){bestD=d;best=i;}
   }
   return best>=0 ? rows[best] : null;
@@ -2603,7 +2628,7 @@ canvas.addEventListener('mousemove', (e)=>{
       tooltip.style.top = Math.max(my-50,4)+'px';
       tooltip.innerHTML = `
         <div class="hdr">${r[0]} UTC</div>
-        <div class="row"><span class="lbl">Altitude</span><span>${r[1].toFixed(0)} m</span></div>
+        <div class="row"><span class="lbl">Altitude</span><span>${formatAltitude(r[1], state.rows[0][1])}</span></div>
         <div class="row"><span class="lbl">Pressure</span><span>${r[2].toFixed(1)} hPa</span></div>
         <div class="row"><span class="lbl">Wind</span><span>${msToKt(r[6]).toFixed(0)} kt / ${windFromDeg(r[7]).toFixed(0)}°</span></div>
       `;
@@ -2618,7 +2643,7 @@ canvas.addEventListener('mousemove', (e)=>{
   tooltip.style.top = Math.max(my-70,4)+'px';
   tooltip.innerHTML = `
     <div class="hdr">${pt[0]} UTC</div>
-    <div class="row"><span class="lbl">Altitude</span><span>${pt[1].toFixed(0)} m</span></div>
+    <div class="row"><span class="lbl">Altitude</span><span>${formatAltitude(pt[1], state.rows[0][1])}</span></div>
     <div class="row"><span class="lbl">Pressure</span><span>${pt[2].toFixed(1)} hPa</span></div>
     <div class="row"><span class="lbl">Temp</span><span>${pt[3].toFixed(1)} °C</span></div>
     <div class="row"><span class="lbl">Dew point</span><span>${pt[5].toFixed(1)} °C</span></div>
@@ -3494,7 +3519,29 @@ function showDataView(){
   }
   // otherwise: leave the empty state showing until the user uploads a CSV
   // or clicks "Sample data" — no dataset is opened by default.
+
+  showWelcomeOverlay();
 })();
+
+function showWelcomeOverlay(){
+  const overlay = document.getElementById('welcomeOverlay');
+  const bar = document.getElementById('welcomeProgressBar');
+  overlay.style.display = 'flex';
+  // kick off the 15s progress-bar shrink on the next frame, so the CSS
+  // transition actually animates instead of jumping straight to 0
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{ bar.style.width = '0%'; });
+  });
+  const autoCloseTimer = setTimeout(hideWelcomeOverlay, 15000);
+  document.getElementById('welcomeCloseBtn').addEventListener('click', ()=>{
+    clearTimeout(autoCloseTimer);
+    hideWelcomeOverlay();
+  });
+}
+function hideWelcomeOverlay(){
+  document.getElementById('welcomeOverlay').style.display = 'none';
+}
+
 </script>
 </body>
 </html>
