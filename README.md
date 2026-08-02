@@ -1,4 +1,8 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde (v76)
+# Stüve Diagram Tool — S2/RR4 Radiosonde (v82)
+
+> The in-app title now reads "Radiosonde Sounding Diagram" (it covers more
+> than just Stüve diagrams) — this repository/document keeps its original
+> name for continuity.
 
 > **License:** This project uses a custom, non-standard license (see
 > `LICENSE`). Using the app is permitted, but modifying, redistributing, or
@@ -116,6 +120,14 @@ smoothing, Theta-E, and cloud-shading threshold — back to their standard
 defaults, so every flight starts from the same known view (and, since
 transition altitude depends on the launch site, you'll be asked to confirm
 it again for each new flight).
+
+Every button and control besides loading data itself, "My flights", the
+light/dark toggle, and the keyboard-shortcuts panel stays locked (visibly
+grayed out) until a flight — sample or your own — is actually loaded, so
+there's no way to accidentally export, print, save, compare, or upload
+data that isn't really showing on screen. If an uploaded CSV doesn't match
+the expected column structure, you'll get a clear error message instead of
+a silent or confusing failure.
 
 ## Default view settings
 
