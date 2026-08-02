@@ -359,11 +359,11 @@
       <div class="title-block">
         <div class="eyebrow">Amateur Radiosonde Telemetry</div>
         <h1><a href="https://sparv.io/" target="_blank" rel="noopener" class="title-link">Radiosonde Sounding Diagram</a></h1>
-        <p id="subtitle">please load Windsond S2 ascent data … · v82 (2026-08-02)</p>
+        <p id="subtitle">please load Windsond S2 ascent data … · v85 (2026-08-02)</p>
         <p style="margin:2px 0 0;font-size:12px;color:var(--text-dim);font-family:var(--mono);
           display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span id="launchLoc"></span>
-          <span id="headerVersionStamp" style="visibility:hidden;">· v82 (2026-08-02)</span>
+          <span id="headerVersionStamp" style="visibility:hidden;">· v85 (2026-08-02)</span>
         </p>
       </div>
       <img class="header-logo" alt="Wicki Partners Ballonteam"
@@ -554,7 +554,7 @@
       <div style="display:flex;flex-direction:column;gap:3px;">
         <label style="font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.06em;" for="cloudThreshInput">CLOUD SHADING FROM</label>
         <div style="display:flex;align-items:center;gap:4px;height:36px;">
-          <input id="cloudThreshInput" class="locked-until-data" type="number" min="20" max="100" step="5" value="70"
+          <input id="cloudThreshInput" class="locked-until-data" type="number" min="20" max="100" step="5" value="85"
             style="width:52px;height:36px;box-sizing:border-box;background:var(--panel-2);
             border:1px solid var(--line);color:var(--text);font-family:var(--mono);font-size:12px;
             padding:0 6px;border-radius:6px;text-align:center;">
@@ -733,12 +733,13 @@ function thinForShare(rows, targetPoints){
   return out.map(r => [r[0], r0(r[1]), r1(r[2]), r1(r[3]), r0(r[4]), r1(r[5]), r1(r[6]), r0(r[7]), r4(r[8]), r4(r[9]), r1(r[10])]);
 }
 
+fillInterpolatedGaps(RAW_EMBEDDED_DATA);
 const EMBEDDED_DATA = trimGroundPhase(RAW_EMBEDDED_DATA);
 const RAW_FULL_TRAIL = [[47.1757,7.402085,416.0],[47.175702,7.402092,416.0],[47.17569,7.40211,416.0],[47.175697,7.402107,416.0],[47.175705,7.402102,416.0],[47.175705,7.402105,416.0],[47.175705,7.402097,417.0],[47.17569,7.40211,417.0],[47.175697,7.40213,418.0],[47.175757,7.40212,419.0],[47.175757,7.402115,421.0],[47.17575,7.40212,421.0],[47.17575,7.40212,424.0],[47.175742,7.402125,425.0],[47.17574,7.402127,425.0],[47.17574,7.402125,425.0],[47.17574,7.402117,426.0],[47.17574,7.402112,426.0],[47.17575,7.40211,425.0],[47.175745,7.402122,425.0],[47.175742,7.40212,425.0],[47.175732,7.402117,425.0],[47.175747,7.402105,425.0],[47.175755,7.40211,425.0],[47.175755,7.40211,425.0],[47.17576,7.402115,425.0],[47.175757,7.402112,424.0],[47.175752,7.402112,424.0],[47.175752,7.402105,424.0],[47.175755,7.402107,424.0],[47.175752,7.402105,424.0],[47.175745,7.402115,424.0],[47.175745,7.402115,424.0],[47.175745,7.402115,424.0],[47.175755,7.402115,424.0],[47.175755,7.40211,425.0],[47.175755,7.402107,424.0],[47.17576,7.402102,424.0],[47.175767,7.4021,424.0],[47.175765,7.402097,424.0],[47.175762,7.4021,424.0],[47.175755,7.402112,425.0],[47.17576,7.402107,425.0],[47.175762,7.402105,425.0],[47.175765,7.402102,426.0],[47.175765,7.402105,426.0],[47.175767,7.402102,426.0],[47.175762,7.4021,426.0],[47.17577,7.402095,426.0],[47.17577,7.40209,426.0],[47.175775,7.40209,427.0],[47.175772,7.402092,427.0],[47.175772,7.402095,427.0],[47.175775,7.402092,427.0],[47.175765,7.402092,428.0],[47.175765,7.40209,428.0],[47.175767,7.40209,428.0],[47.175755,7.402092,427.0],[47.17577,7.402087,428.0],[47.17577,7.402097,428.0],[47.17577,7.402105,427.0],[47.175775,7.4021,428.0],[47.175765,7.402105,428.0],[47.175757,7.402105,427.0],[47.17576,7.4021,427.0],[47.175765,7.402095,427.0],[47.175765,7.40209,426.0],[47.175765,7.402085,427.0],[47.175767,7.402085,427.0],[47.175767,7.40209,427.0],[47.175767,7.40209,427.0],[47.17578,7.402105,427.0],[47.175767,7.402102,427.0],[47.175757,7.402105,427.0],[47.175755,7.402095,427.0],[47.175755,7.40209,427.0],[47.175762,7.40208,427.0],[47.17577,7.402075,427.0],[47.175765,7.402075,427.0],[47.175745,7.402087,427.0],[47.175737,7.402107,428.0],[47.17571,7.402072,428.0],[47.175705,7.402035,426.0],[47.175732,7.40209,426.0],[47.17573,7.402102,426.0],[47.175732,7.40206,426.0],[47.175735,7.40205,426.0],[47.175737,7.402082,426.0],[47.17573,7.40208,425.0],[47.17574,7.402095,425.0],[47.176142,7.402662,447.0],[47.176547,7.403335,469.0],[47.176945,7.404027,494.0],[47.1774,7.404755,522.0],[47.177815,7.40555,546.0],[47.17821,7.40631,568.0],[47.178562,7.407135,592.0],[47.17898,7.407895,620.0],[47.179365,7.408675,647.0],[47.179712,7.40937,672.0],[47.180002,7.410015,697.0],[47.180227,7.410685,726.0],[47.180485,7.41131,746.0],[47.180715,7.41191,771.0],[47.18089,7.41256,796.0],[47.181027,7.413187,818.0],[47.18116,7.41391,840.0],[47.181212,7.414665,862.0],[47.181175,7.415492,885.0],[47.181147,7.416265,905.0],[47.181087,7.41689,924.0],[47.180972,7.41754,948.0],[47.180782,7.418217,965.0],[47.180582,7.41894,980.0],[47.18034,7.419637,1003.0],[47.180112,7.420185,1018.0],[47.179877,7.42078,1040.0],[47.179625,7.421377,1065.0],[47.17947,7.422042,1081.0],[47.179277,7.422647,1093.0],[47.17904,7.423225,1111.0],[47.178802,7.423785,1135.0],[47.178587,7.424212,1159.0],[47.178342,7.424625,1185.0],[47.178105,7.425017,1212.0],[47.177822,7.425395,1243.0],[47.177597,7.42586,1275.0],[47.177307,7.426455,1304.0],[47.1771,7.42685,1320.0],[47.176875,7.427237,1337.0],[47.176542,7.427792,1362.0],[47.176205,7.428282,1392.0],[47.17588,7.428795,1422.0],[47.175532,7.429355,1451.0],[47.175272,7.429967,1478.0],[47.17498,7.430577,1504.0],[47.17472,7.431155,1527.0],[47.174517,7.431667,1543.0],[47.174365,7.432145,1560.0],[47.174205,7.432507,1570.0],[47.174002,7.433037,1580.0],[47.173795,7.433565,1592.0],[47.17366,7.434075,1609.0],[47.1735,7.434587,1631.0],[47.173342,7.43506,1658.0],[47.173217,7.43563,1684.0],[47.173122,7.43617,1712.0],[47.173052,7.436715,1741.0],[47.172985,7.43725,1771.0],[47.172925,7.43779,1799.0],[47.172837,7.43836,1827.0],[47.172807,7.438915,1854.0],[47.17277,7.43944,1879.0],[47.172775,7.439995,1903.0],[47.172777,7.440545,1928.0],[47.172775,7.44118,1949.0],[47.172797,7.441805,1971.0],[47.172807,7.442415,1995.0],[47.172822,7.443012,2019.0],[47.17289,7.443655,2037.0],[47.172965,7.444355,2056.0],[47.173047,7.445035,2076.0],[47.173135,7.445707,2096.0],[47.173227,7.446352,2116.0],[47.17335,7.44699,2137.0],[47.173522,7.44765,2157.0],[47.173735,7.44829,2179.0],[47.17392,7.448945,2200.0],[47.17412,7.449582,2221.0],[47.17432,7.45026,2241.0],[47.17455,7.45089,2263.0],[47.17483,7.45157,2285.0],[47.1751,7.45224,2305.0],[47.175365,7.452897,2326.0],[47.17564,7.45356,2347.0],[47.175947,7.45422,2370.0],[47.176285,7.454835,2392.0],[47.17667,7.45541,2414.0],[47.177087,7.455947,2436.0],[47.17749,7.456572,2459.0],[47.177942,7.457182,2481.0],[47.17842,7.457882,2504.0],[47.179017,7.458662,2529.0],[47.179627,7.459397,2552.0],[47.18032,7.460062,2578.0],[47.181035,7.46076,2606.0],[47.181805,7.461497,2642.0],[47.182515,7.46212,2672.0],[47.183305,7.462785,2703.0],[47.18413,7.463417,2734.0],[47.185025,7.464,2764.0],[47.18595,7.46465,2792.0],[47.186872,7.465265,2823.0],[47.187822,7.4659,2858.0],[47.188747,7.466592,2891.0],[47.189692,7.46729,2934.0],[47.190695,7.468107,2965.0],[47.191687,7.468947,2997.0],[47.192697,7.46974,3025.0],[47.193657,7.470525,3049.0],[47.19462,7.471275,3078.0],[47.195627,7.472055,3106.0],[47.1968,7.47313,3137.0],[47.198137,7.474432,3175.0],[47.199055,7.475387,3199.0],[47.200037,7.476377,3224.0],[47.201485,7.477825,3263.0],[47.202515,7.478872,3289.0],[47.203515,7.479922,3314.0],[47.204502,7.481045,3340.0],[47.20555,7.482122,3368.0],[47.206535,7.483215,3395.0],[47.20755,7.484402,3421.0],[47.20856,7.485587,3444.0],[47.209515,7.48683,3465.0],[47.210475,7.48807,3486.0],[47.21143,7.489347,3506.0],[47.212407,7.490667,3526.0],[47.21338,7.49194,3545.0],[47.214332,7.4931,3565.0],[47.215287,7.494192,3583.0],[47.216262,7.495292,3601.0],[47.217217,7.496482,3617.0],[47.218185,7.497735,3634.0],[47.219152,7.498997,3651.0],[47.220065,7.500245,3667.0],[47.220955,7.501487,3684.0],[47.221855,7.502672,3702.0],[47.222725,7.50381,3720.0],[47.223595,7.50497,3738.0],[47.224452,7.506105,3755.0],[47.22535,7.50728,3775.0],[47.226195,7.508492,3795.0],[47.227047,7.509737,3817.0],[47.22788,7.511035,3839.0],[47.228672,7.512327,3861.0],[47.22945,7.513632,3883.0],[47.23015,7.51492,3906.0],[47.230897,7.516232,3932.0],[47.231675,7.517575,3958.0],[47.232455,7.5189,3984.0],[47.233255,7.520317,4010.0],[47.233987,7.52174,4037.0],[47.2347,7.523177,4065.0],[47.2354,7.52469,4093.0],[47.23607,7.526267,4121.0],[47.236695,7.527817,4147.0],[47.237375,7.52938,4176.0],[47.238002,7.530935,4206.0],[47.238982,7.533312,4252.0],[47.239707,7.534912,4282.0],[47.240455,7.536525,4312.0],[47.24125,7.53815,4343.0],[47.242072,7.53976,4372.0],[47.2429,7.541412,4401.0],[47.243655,7.54302,4430.0],[47.244417,7.544612,4460.0],[47.245215,7.546202,4491.0],[47.24603,7.547755,4521.0],[47.24685,7.549327,4550.0],[47.24767,7.550905,4577.0],[47.248475,7.55242,4603.0],[47.249615,7.554582,4642.0],[47.25067,7.556565,4685.0],[47.25162,7.558317,4716.0],[47.252552,7.560125,4753.0],[47.253415,7.561957,4787.0],[47.254267,7.563567,4828.0],[47.255092,7.56502,4863.0],[47.255917,7.566352,4900.0],[47.25673,7.56763,4932.0],[47.2575,7.56894,4964.0],[47.258297,7.570187,5001.0],[47.259085,7.571355,5038.0],[47.25995,7.5725,5077.0],[47.260855,7.573657,5116.0],[47.261825,7.57478,5156.0],[47.26279,7.5759,5195.0],[47.263647,7.57689,5236.0],[47.264455,7.57784,5278.0],[47.265297,7.57878,5321.0],[47.26621,7.57977,5365.0],[47.26711,7.5807,5412.0],[47.267745,7.58135,5442.0],[47.26873,7.58237,5492.0],[47.26974,7.58332,5543.0],[47.27069,7.58413,5593.0],[47.271562,7.58482,5639.0],[47.272387,7.585435,5683.0],[47.273222,7.585995,5723.0],[47.274095,7.58644,5763.0],[47.274987,7.586825,5800.0],[47.275895,7.587247,5835.0],[47.276892,7.587815,5867.0],[47.277905,7.588515,5902.0],[47.27884,7.58932,5940.0],[47.279755,7.590307,5978.0],[47.280665,7.591342,6017.0],[47.28157,7.592515,6058.0],[47.282635,7.593902,6097.0],[47.28371,7.595442,6138.0],[47.284725,7.596957,6176.0],[47.285857,7.598465,6213.0],[47.286975,7.600015,6251.0],[47.28808,7.601585,6291.0],[47.28877,7.602612,6318.0],[47.2898,7.604192,6359.0],[47.29078,7.605757,6402.0],[47.29171,7.607255,6444.0],[47.292582,7.608745,6487.0],[47.293425,7.610185,6528.0],[47.29427,7.61153,6570.0],[47.295145,7.612842,6615.0],[47.296085,7.61421,6662.0],[47.29703,7.61558,6711.0],[47.298027,7.616937,6757.0],[47.299002,7.61826,6806.0],[47.29995,7.619605,6854.0],[47.30088,7.620957,6903.0],[47.30183,7.62247,6950.0],[47.302752,7.623975,6996.0],[47.303715,7.62556,7041.0],[47.30469,7.627195,7084.0],[47.305632,7.628935,7121.0],[47.3065,7.630755,7157.0],[47.307305,7.632737,7191.0],[47.30813,7.634652,7224.0],[47.308917,7.636612,7257.0],[47.30971,7.638572,7288.0],[47.310482,7.64062,7320.0],[47.31122,7.642825,7350.0],[47.311992,7.645047,7378.0],[47.31276,7.64734,7409.0],[47.313677,7.649722,7434.0],[47.314555,7.652095,7460.0],[47.315427,7.654572,7490.0],[47.316325,7.657167,7522.0],[47.317072,7.65934,7550.0],[47.317857,7.661485,7577.0],[47.318815,7.664005,7610.0],[47.319832,7.66649,7643.0],[47.320825,7.66904,7682.0],[47.321895,7.671575,7721.0],[47.32299,7.674187,7757.0],[47.324137,7.67684,7795.0],[47.325295,7.679545,7833.0],[47.326455,7.68227,7872.0],[47.327667,7.685067,7910.0],[47.328975,7.687932,7946.0],[47.330317,7.690947,7981.0],[47.33164,7.693995,8017.0],[47.33305,7.697132,8054.0],[47.334482,7.700277,8090.0],[47.33608,7.703255,8130.0],[47.337835,7.706037,8169.0],[47.339672,7.70877,8209.0],[47.34156,7.711427,8247.0],[47.34355,7.713917,8286.0],[47.34558,7.716222,8328.0],[47.347655,7.718397,8370.0],[47.349735,7.720512,8410.0],[47.351852,7.722695,8451.0],[47.353985,7.724917,8492.0],[47.356042,7.72723,8532.0],[47.358065,7.72951,8573.0],[47.36008,7.731782,8613.0],[47.362045,7.734062,8654.0],[47.363955,7.736455,8695.0],[47.366035,7.73875,8736.0],[47.36818,7.74111,8772.0],[47.370335,7.743455,8808.0],[47.372497,7.745725,8847.0],[47.374737,7.74805,8886.0],[47.376965,7.750345,8929.0],[47.379945,7.753255,8988.0],[47.38294,7.75636,9043.0],[47.385892,7.759622,9095.0],[47.388892,7.7629,9142.0],[47.395175,7.76983,9227.0],[47.397632,7.772375,9258.0],[47.399997,7.77486,9291.0],[47.402337,7.777362,9251.0],[47.406715,7.78214,8625.0],[47.411085,7.788872,7787.0],[47.411692,7.79052,7567.0],[47.41283,7.79397,7044.0],[47.41437,7.79671,6397.0],[47.41999,7.803085,4838.0],[47.42074,7.804637,4656.0],[47.421565,7.806632,4493.0],[47.42277,7.80866,4328.0],[47.423785,7.810705,4148.0],[47.424715,7.812755,3966.0],[47.425935,7.8148,3771.0],[47.427597,7.817575,3400.0]]; // [lat,lon,alt] for the whole flight incl. descent — map only
 
 const state = { rows: null, isDefault: true, source: null, sondeId: null,
   compareFlights: [], windSmoothed: true, barbIntervalSec: 30, scrubIdx: null, diagramType: 'stuve',
-  viewMinPct: 0, viewMaxPct: 1000, fullTrail: null, showThetaE: false, cloudThreshold: 70,
+  viewMinPct: 0, viewMaxPct: 1000, fullTrail: null, showThetaE: false, cloudThreshold: 85,
   speedPanelWidth: null, altitudeUnit: 'amsl', windDisplayMode: 'barb', printWithPanels: true,
   transitionAltFt: null, transitionAltConfirmed: false, sondehubUploaded: false, speedUnit: 'kmh' };
 const COMPARE_COLORS = [
@@ -790,8 +791,15 @@ function parseCSV(text){
     if(iLat>=0){ const v=parseFloat(c[iLat]); if(isFinite(v)) lat = v; }
     if(iLon>=0){ const v=parseFloat(c[iLon]); if(isFinite(v)) lon = v; }
     if(iRise>=0){ const v=parseFloat(c[iRise]); if(isFinite(v)) rise = v; }
-    rows.push([c[iTime], alt, pHpa, temp, rh, Math.round(td*100)/100, spd, hdg, lat, lon, rise]);
+    rows.push([c[iTime], alt, pHpa, temp, rh, Math.round(td*100)/100, spd, hdg, lat, lon, rise, false]);
   }
+
+  // Detect gaps where one or more samples are missing (a time delta well
+  // above the sounding's typical cadence) and fill them with linearly
+  // interpolated rows, flagged so the chart can draw those stretches
+  // dashed instead of implying they were actually measured.
+  fillInterpolatedGaps(rows);
+
   // Keep the full flight's coordinate trail (incl. descent) for the map,
   // before slicing the analysis data down to ascent-only below.
   const fullTrail = [];
@@ -802,6 +810,54 @@ function parseCSV(text){
   let maxIdx = 0;
   for(let i=1;i<rows.length;i++) if(rows[i][1] > rows[maxIdx][1]) maxIdx = i;
   return trimGroundPhase(rows.slice(0, maxIdx+1));
+}
+
+// Parses the "YYYY-MM-DD HH:MM:SS" timestamps used throughout this CSV
+// format into a plain seconds-since-epoch number, and back again.
+function parseCsvTime(s){
+  return Date.parse(s.replace(' ','T')+'Z')/1000;
+}
+function formatCsvTime(epochSec){
+  const iso = new Date(epochSec*1000).toISOString();
+  return iso.slice(0,10)+' '+iso.slice(11,19);
+}
+
+function fillInterpolatedGaps(rows){
+  if(rows.length < 3) return;
+  const deltas = [];
+  for(let i=1;i<rows.length;i++){
+    const dt = parseCsvTime(rows[i][0]) - parseCsvTime(rows[i-1][0]);
+    if(dt > 0) deltas.push(dt);
+  }
+  if(deltas.length === 0) return;
+  deltas.sort((a,b)=>a-b);
+  const typical = deltas[Math.floor(deltas.length/2)] || 1;
+  const gapThreshold = Math.max(typical*1.8, typical+1);
+
+  const out = [rows[0]];
+  for(let i=1;i<rows.length;i++){
+    const prev = rows[i-1], cur = rows[i];
+    const tPrev = parseCsvTime(prev[0]), tCur = parseCsvTime(cur[0]);
+    const dt = tCur - tPrev;
+    if(dt > gapThreshold && isFinite(dt)){
+      const steps = Math.round(dt/typical);
+      for(let s=1; s<steps; s++){
+        const f = s/steps;
+        const t = tPrev + dt*f;
+        const lerp = (a,b)=> (a!=null && b!=null) ? a+(b-a)*f : null;
+        out.push([
+          formatCsvTime(t),
+          lerp(prev[1],cur[1]), lerp(prev[2],cur[2]), lerp(prev[3],cur[3]),
+          lerp(prev[4],cur[4]), lerp(prev[5],cur[5]), lerp(prev[6],cur[6]),
+          lerp(prev[7],cur[7]), lerp(prev[8],cur[8]), lerp(prev[9],cur[9]),
+          lerp(prev[10],cur[10]), true
+        ]);
+      }
+    }
+    out.push(cur);
+  }
+  rows.length = 0;
+  rows.push(...out);
 }
 
 // ---------- Meteorology helpers ----------
@@ -2464,6 +2520,25 @@ function draw(rows){
     ctx.fillText(`${formatAltitude(rows[0][1], rows[0][1])} · GROUND`, pad.left+4, groundY-3);
   }
 
+  // ---------- Peak altitude marker on the Y axis ----------
+  {
+    let peakIdx = 0;
+    for(let i=1;i<rows.length;i++){ if(rows[i][1] > rows[peakIdx][1]) peakIdx = i; }
+    const peakRow = rows[peakIdx];
+    const yPeak = yScale(yOf(peakRow[2]));
+    if(yPeak >= pad.top-2 && yPeak <= pad.top+plotH+2){
+      const peakColor = '#a8712e';
+      ctx.fillStyle = peakColor;
+      ctx.font = 'bold 9px IBM Plex Mono, monospace';
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(
+        `💥 ${formatAltitude(peakRow[1], rows[0][1])} / ${Math.round(peakRow[2])} hPa`,
+        pad.left-56, yPeak
+      );
+      ctx.fillStyle = cText;
+    }
+  }
+
   // ---------- Freezing level & tropopause markers ----------
   const thermoMarkers = computeThermo(rows);
   if(thermoMarkers){
@@ -2752,13 +2827,17 @@ function draw(rows){
   function drawCurve(colIdx, color){
     ctx.strokeStyle = color;
     ctx.lineWidth = 2.2;
-    ctx.beginPath();
-    rows.forEach((r,i)=>{
-      const x = xScale(r[colIdx]);
-      const y = yScale(yOf(r[2]));
-      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    });
-    ctx.stroke();
+    for(let i=0;i<rows.length-1;i++){
+      const r1 = rows[i], r2 = rows[i+1];
+      const x1 = xScale(r1[colIdx]), y1 = yScale(yOf(r1[2]));
+      const x2 = xScale(r2[colIdx]), y2 = yScale(yOf(r2[2]));
+      ctx.setLineDash((r1[11]===true || r2[11]===true) ? [3,3] : []);
+      ctx.beginPath();
+      ctx.moveTo(x1,y1);
+      ctx.lineTo(x2,y2);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
   }
   drawCurve(5, cv('--dew'));
   drawCurve(3, cv('--temp'));
@@ -2766,15 +2845,17 @@ function draw(rows){
   if(state.showThetaE){
     ctx.strokeStyle = '#c76bd1';
     ctx.lineWidth = 1.8;
-    ctx.setLineDash([6,3]);
-    ctx.beginPath();
-    rows.forEach((r,i)=>{
-      const te = thetaE(r[3], r[5], r[2]);
-      const x = xScale(te);
-      const y = yScale(yOf(r[2]));
-      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    });
-    ctx.stroke();
+    for(let i=0;i<rows.length-1;i++){
+      const r1 = rows[i], r2 = rows[i+1];
+      const te1 = thetaE(r1[3], r1[5], r1[2]), te2 = thetaE(r2[3], r2[5], r2[2]);
+      const x1 = xScale(te1), y1 = yScale(yOf(r1[2]));
+      const x2 = xScale(te2), y2 = yScale(yOf(r2[2]));
+      ctx.setLineDash((r1[11]===true || r2[11]===true) ? [3,3] : [6,3]);
+      ctx.beginPath();
+      ctx.moveTo(x1,y1);
+      ctx.lineTo(x2,y2);
+      ctx.stroke();
+    }
     ctx.setLineDash([]);
   }
 
@@ -2880,13 +2961,17 @@ function draw(rows){
   // speed curve
   ctx.strokeStyle = cWindLine;
   ctx.lineWidth = 1.8;
-  ctx.beginPath();
-  windRowsAll.forEach((r,i)=>{
-    const x = speedScale(formatSpeed(r[6]));
-    const y = yScale(yOf(r[2]));
-    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-  });
-  ctx.stroke();
+  for(let i=0;i<windRowsAll.length-1;i++){
+    const r1 = windRowsAll[i], r2 = windRowsAll[i+1];
+    const x1 = speedScale(formatSpeed(r1[6])), y1 = yScale(yOf(r1[2]));
+    const x2 = speedScale(formatSpeed(r2[6])), y2 = yScale(yOf(r2[2]));
+    ctx.setLineDash((r1[11]===true || r2[11]===true) ? [3,3] : []);
+    ctx.beginPath();
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2,y2);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
   ctx.restore();
 
   ctx.strokeStyle = cLine;
@@ -2955,7 +3040,7 @@ function draw(rows){
 // ---------- Generic small height-profile chart (rise speed, theta-e, ...) ----------
 function drawMiniProfile(canvasId, cardId, rows, getValue, color, unitDecimals){
   const card = document.getElementById(cardId);
-  const pts = rows.map(r=>({v:getValue(r), y:yOf(r[2])})).filter(p=>p.v!=null && isFinite(p.v));
+  const pts = rows.map(r=>({v:getValue(r), y:yOf(r[2]), interp: r[11]===true})).filter(p=>p.v!=null && isFinite(p.v));
   if(pts.length < 5){ card.style.display='none'; return; }
   card.style.display = 'block';
 
@@ -3039,12 +3124,17 @@ function drawMiniProfile(canvasId, cardId, rows, getValue, color, unitDecimals){
 
   mctx.strokeStyle = color;
   mctx.lineWidth = 1.8;
-  mctx.beginPath();
-  pts.forEach((p,i)=>{
-    const x = xScale2(p.v), y = yScale2(p.y);
-    if(i===0) mctx.moveTo(x,y); else mctx.lineTo(x,y);
-  });
-  mctx.stroke();
+  for(let i=0;i<pts.length-1;i++){
+    const p1 = pts[i], p2 = pts[i+1];
+    const x1 = xScale2(p1.v), y1 = yScale2(p1.y);
+    const x2 = xScale2(p2.v), y2 = yScale2(p2.y);
+    mctx.setLineDash((p1.interp || p2.interp) ? [3,3] : []);
+    mctx.beginPath();
+    mctx.moveTo(x1,y1);
+    mctx.lineTo(x2,y2);
+    mctx.stroke();
+  }
+  mctx.setLineDash([]);
 
   mctx.fillStyle = cTextDim2;
   mctx.font = '9.5px IBM Plex Mono, monospace';
@@ -3248,7 +3338,7 @@ function drawHodograph(rows){
     // vector wind points TOWARD where the air is going (opposite of "from")
     const u = kt*Math.sin(rad+Math.PI);
     const v = kt*Math.cos(rad+Math.PI);
-    return {u, v, p: r[2], alt: r[1]};
+    return {u, v, p: r[2], alt: r[1], interp: r[11]===true};
   });
 
   const maxSpeed = Math.max(...pts.map(p=>Math.sqrt(p.u*p.u+p.v*p.v)));
@@ -3287,10 +3377,12 @@ function drawHodograph(rows){
     const f = i/(pts.length-1);
     const col = `rgb(${Math.round(80+150*f)}, ${Math.round(140-60*f)}, ${Math.round(200-140*f)})`;
     hctx.strokeStyle = col;
+    hctx.setLineDash((pts[i].interp || pts[i+1].interp) ? [3,3] : []);
     hctx.beginPath();
     hctx.moveTo(cx+pts[i].u*scale, cy-pts[i].v*scale);
     hctx.lineTo(cx+pts[i+1].u*scale, cy-pts[i+1].v*scale);
     hctx.stroke();
+    hctx.setLineDash([]);
     hctx.fillStyle = col;
     hctx.beginPath();
     hctx.arc(cx+pts[i].u*scale, cy-pts[i].v*scale, 2.5, 0, Math.PI*2);
@@ -5120,7 +5212,7 @@ function resetConfigDefaults(){
   state.sondehubUploaded = false;
   document.getElementById('sondehubBtn').innerHTML = '☁ Upload to SondeHub';
   state.showThetaE = false;
-  state.cloudThreshold = 70;
+  state.cloudThreshold = 85;
   state.transitionAltFt = null;
   state.transitionAltConfirmed = false;
   state.speedUnit = 'kmh';
@@ -5130,7 +5222,7 @@ function resetConfigDefaults(){
   document.getElementById('speedUnitSelect').value = 'kmh';
   document.getElementById('barbDensitySelect').value = '30';
   document.getElementById('windDisplayModeSelect').value = 'barb';
-  document.getElementById('cloudThreshInput').value = '70';
+  document.getElementById('cloudThreshInput').value = '85';
   document.getElementById('windSmoothBtn').textContent = '〜 Smoothed';
   document.getElementById('thetaEToggleBtn').textContent = 'Off';
   document.getElementById('taEditLink').style.display = 'none';

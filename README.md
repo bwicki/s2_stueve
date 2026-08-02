@@ -1,4 +1,4 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde (v82)
+# Stüve Diagram Tool — S2/RR4 Radiosonde (v85)
 
 > The in-app title now reads "Radiosonde Sounding Diagram" (it covers more
 > than just Stüve diagrams) — this repository/document keeps its original
@@ -133,7 +133,7 @@ a silent or confusing failure.
 
 Stüve diagram · Flight Level altitude axis · 30 s barb density · smoothed
 wind · wind barbs (not numeric direction) · Theta-E curve off · cloud
-shading from 70% RH. Any of these can be changed per-session in the "Graph
+shading from 85% RH. Any of these can be changed per-session in the "Graph
 Variables" row above the main chart.
 
 ## Sharing a flight via link (optional setup)
