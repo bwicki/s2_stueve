@@ -228,7 +228,7 @@
     #panelsRow > div{min-width:0 !important;flex:none !important;}
     #hodoCard > div:first-child, #riseCard > div:first-child,
     #thetaECard > div:first-child, #mapCard > div:first-child{font-size:7.5px;margin-bottom:4px !important;}
-    .panel-export-btn, #mapExportBtn, #mapExpandBtn, #exportPngBtn, #windPanelHandle, #printModalOverlay, #welcomeOverlay, #chartCursorOverlay, #hodoCursorOverlay, #riseCursorOverlay, #thetaECursorOverlay, #mapCursorOverlay, .stat-info-btn, .stat-hover-tip, #statHoverTip, #infoModalOverlay, #taModalOverlay, #taEditLink, #sondehubModalOverlay, #appConfirmOverlay{display:none !important;}
+    .panel-export-btn, #mapExportBtn, #mapExpandBtn, #exportPngBtn, #windPanelHandle, #printModalOverlay, #welcomeOverlay, #chartCursorOverlay, #hodoCursorOverlay, #riseCursorOverlay, #thetaECursorOverlay, #mapCursorOverlay, .stat-info-btn, .stat-hover-tip, #statHoverTip, #infoModalOverlay, #taModalOverlay, #taEditLink, #sondehubModalOverlay, #appConfirmOverlay, #pollModalOverlay{display:none !important;}
     html.print-no-panels #panelsRow{display:none !important;}
     .legend{gap:2px 8px;padding:3px 2px 1px;font-size:7px;line-height:1.1;}
     .swatch{width:10px;border-top-width:1.6px;}
@@ -253,8 +253,8 @@
         padding:18px 22px;font-family:var(--mono);color:var(--text);max-width:440px;
         box-shadow:0 16px 44px rgba(0,0,0,.45);position:relative;pointer-events:auto;">
       <button id="welcomeCloseBtn" title="Close" style="position:absolute;top:9px;right:9px;
-          background:transparent;border:none;color:var(--text-dim);font-size:15px;cursor:pointer;
-          line-height:1;padding:4px 6px;border-radius:4px;">✕</button>
+          background:#c9463a;border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer;
+          line-height:1;padding:5px 7px;border-radius:5px;">✕</button>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-right:20px;">
         <span style="font-size:16px;">🎈</span>
         <span style="font-size:13px;font-weight:700;letter-spacing:.01em;">Quick start</span>
@@ -299,6 +299,31 @@
         <button class="reset-btn" id="taCancelBtn">Use m AMSL instead</button>
         <button class="reset-btn" id="taConfirmBtn" style="background:var(--amber);
           border-color:var(--amber);color:#1a1200;font-weight:700;">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pollModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+      z-index:180;align-items:center;justify-content:center;padding:24px;">
+    <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+        padding:22px 26px;font-family:var(--mono);color:var(--text);max-width:400px;
+        box-shadow:0 12px 40px rgba(0,0,0,.4);">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;">Is the sonde still in ascent?</div>
+      <div id="pollIntro" style="font-size:11.5px;color:var(--text-dim);line-height:1.55;margin-bottom:16px;">
+        Do you want to keep polling this CSV file until the sonde flight is completed?
+        The diagram will keep rebuilding itself as new rows are written to the file.
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+        <label style="font-size:11px;color:var(--text-dim);">Polling interval:</label>
+        <input id="pollIntervalInput" type="number" min="2" max="300" step="1" value="10"
+          style="width:64px;background:var(--bg);border:1px solid var(--line);color:var(--text);
+          font-family:var(--mono);font-size:12px;padding:5px 8px;border-radius:5px;">
+        <span style="font-size:11px;color:var(--text-dim);">sec</span>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="reset-btn" id="pollNoBtn" style="background:var(--amber);
+          border-color:var(--amber);color:#1a1200;font-weight:700;">No</button>
+        <button class="reset-btn" id="pollYesBtn">Yes</button>
       </div>
     </div>
   </div>
@@ -361,11 +386,11 @@
       <div class="title-block">
         <div class="eyebrow">Amateur Radiosonde Telemetry</div>
         <h1><a href="https://sparv.io/" target="_blank" rel="noopener" class="title-link">Radiosonde Sounding Diagram</a></h1>
-        <p id="subtitle">please load Windsond S2 ascent data … · v1.03.01 (2026-08-02)</p>
+        <p id="subtitle">please load Windsond S2 ascent data … · v1.03.02 (2026-08-04)</p>
         <p style="margin:2px 0 0;font-size:12px;color:var(--text-dim);font-family:var(--mono);
           display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span id="launchLoc"></span>
-          <span id="headerVersionStamp" style="visibility:hidden;">· v1.03.01 (2026-08-02)</span>
+          <span id="headerVersionStamp" style="visibility:hidden;">· v1.03.02 (2026-08-04)</span>
         </p>
       </div>
       <img class="header-logo" alt="Wicki Partners Ballonteam"
@@ -374,9 +399,13 @@
 
     <div class="controls-stack">
       <div class="controls">
-        <label class="file-btn">⤒ Load new CSV (raw_flight_history)
-          <input type="file" id="fileInput" accept=".csv">
-        </label>
+        <span id="loadCsvWrapper" style="display:inline-flex;">
+          <label class="file-btn" id="loadCsvLabel">⤒ Load new CSV (raw_flight_history)
+            <input type="file" id="fileInput" accept=".csv">
+          </label>
+          <button class="reset-btn" id="stopPollingBtn" style="display:none;background:#c9463a;
+            border-color:#c9463a;color:#fff;font-weight:700;">⏹ Stop polling of CSV</button>
+        </span>
         <button class="reset-btn locked-until-data" id="saveFlightBtn">💾 Save flight</button>
         <div style="position:relative;display:inline-block;">
           <button class="reset-btn" id="myFlightsBtn">📂 My flights</button>
@@ -3868,33 +3897,112 @@ window.addEventListener('resize', ()=>{
   if(LEAFLET_MAP) LEAFLET_MAP.invalidateSize();
 });
 
+// ---------- CSV loading (shared by classic <input type=file> and the
+// File System Access API path used for live polling) ----------
+let CURRENT_FILE_HANDLE = null; // FileSystemFileHandle, only when the browser supports it
+let pollIntervalTimer = null;
+
+function loadCsvText(text, filename){
+  const rows = parseCSV(text);
+  if(rows.length < 2) throw new Error('No valid data rows found.');
+  state.rows = rows;
+  state.fullTrail = LAST_PARSED_TRAIL;
+  state.isDefault = false;
+  state.source = filename;
+  const m = filename.match(/_(\d{4,6})_raw/) || filename.match(/(\d{4,6})/);
+  if(m){ state.sondeId = m[1]; }
+}
+function afterFreshCsvLoad(){
+  resetConfigDefaults();
+  history.replaceState(null,'',location.pathname+location.search);
+  document.getElementById('shareBar').style.display = 'none';
+  renderAll();
+  demoteResetBtn();
+  updateControlsLockState();
+}
+
+// Modern Chromium browsers can pick a file via the File System Access API,
+// which — unlike a classic <input type=file> selection — can be re-read
+// straight from disk later, which is what live polling needs. Older/other
+// browsers fall back to the ordinary file input below.
+if(window.showOpenFilePicker){
+  document.getElementById('loadCsvLabel').addEventListener('click', async (e)=>{
+    e.preventDefault();
+    try{
+      const [handle] = await window.showOpenFilePicker({
+        types: [{description:'CSV files', accept:{'text/csv':['.csv']}}]
+      });
+      const file = await handle.getFile();
+      const text = await file.text();
+      loadCsvText(text, file.name);
+      afterFreshCsvLoad();
+      CURRENT_FILE_HANDLE = handle;
+      openPollModal();
+    }catch(err){
+      if(err.name !== 'AbortError') alert('Could not load this file: '+err.message);
+    }
+  });
+}
+
 document.getElementById('fileInput').addEventListener('change', (e)=>{
   const file = e.target.files[0];
   if(!file) return;
+  stopPolling();
+  CURRENT_FILE_HANDLE = null; // classic picker gives no re-readable handle
   const reader = new FileReader();
   reader.onload = (ev)=>{
     try{
-      const rows = parseCSV(ev.target.result);
-      if(rows.length < 2) throw new Error('No valid data rows found.');
-      state.rows = rows;
-      state.fullTrail = LAST_PARSED_TRAIL;
-      state.isDefault = false;
-      state.source = file.name;
-      // try to auto-detect the sonde id from the filename, e.g. "..._17354_raw_flight_history.csv"
-      const m = file.name.match(/_(\d{4,6})_raw/) || file.name.match(/(\d{4,6})/);
-      if(m){ state.sondeId = m[1]; }
-      resetConfigDefaults();
-      history.replaceState(null,'',location.pathname+location.search);
-      document.getElementById('shareBar').style.display = 'none';
-      renderAll();
-      demoteResetBtn();
-      updateControlsLockState();
+      loadCsvText(ev.target.result, file.name);
+      afterFreshCsvLoad();
+      openPollModal();
     }catch(err){
       alert('Could not load this file: '+err.message);
     }
   };
   reader.readAsText(file);
 });
+
+function openPollModal(){
+  document.getElementById('pollIntervalInput').value = 10;
+  document.getElementById('pollModalOverlay').style.display = 'flex';
+}
+document.getElementById('pollNoBtn').addEventListener('click', ()=>{
+  document.getElementById('pollModalOverlay').style.display = 'none';
+});
+document.getElementById('pollYesBtn').addEventListener('click', ()=>{
+  document.getElementById('pollModalOverlay').style.display = 'none';
+  if(!CURRENT_FILE_HANDLE){
+    alert('Live polling needs a browser that supports the File System Access API '+
+      '(Chrome or Edge on desktop) so the same file can be re-read from disk. '+
+      'This browser can\'t do that — just click "Load new CSV" again whenever '+
+      'you want to refresh with the latest data.');
+    return;
+  }
+  const intervalSec = Math.max(2, parseInt(document.getElementById('pollIntervalInput').value,10) || 10);
+  startPolling(intervalSec);
+});
+
+function startPolling(intervalSec){
+  document.getElementById('loadCsvLabel').style.display = 'none';
+  document.getElementById('stopPollingBtn').style.display = 'inline-flex';
+  pollIntervalTimer = setInterval(async ()=>{
+    if(!CURRENT_FILE_HANDLE) return;
+    try{
+      const file = await CURRENT_FILE_HANDLE.getFile();
+      const text = await file.text();
+      loadCsvText(text, file.name);
+      renderAll();
+    }catch(err){
+      console.error('CSV polling failed:', err);
+    }
+  }, intervalSec*1000);
+}
+function stopPolling(){
+  if(pollIntervalTimer){ clearInterval(pollIntervalTimer); pollIntervalTimer = null; }
+  document.getElementById('loadCsvLabel').style.display = '';
+  document.getElementById('stopPollingBtn').style.display = 'none';
+}
+document.getElementById('stopPollingBtn').addEventListener('click', stopPolling);
 
 document.getElementById('exportBtn').addEventListener('click', ()=>{
   const rows = state.rows;
@@ -4776,6 +4884,8 @@ function demoteResetBtn(){
 }
 
 document.getElementById('resetBtn').addEventListener('click', ()=>{
+  stopPolling();
+  CURRENT_FILE_HANDLE = null;
   state.rows = EMBEDDED_DATA;
   state.fullTrail = RAW_FULL_TRAIL;
   state.isDefault = true;
@@ -5401,7 +5511,7 @@ function showWelcomeOverlay(){
   const bar = document.getElementById('welcomeProgressBar');
   overlay.style.display = 'flex';
 
-  const DURATION = 7000;
+  const DURATION = 5000;
   let remaining = DURATION;
   let lastTick = performance.now();
   let paused = false;

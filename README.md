@@ -1,4 +1,4 @@
-# Stüve Diagram Tool — S2/RR4 Radiosonde (v1.03.01)
+# Stüve Diagram Tool — S2/RR4 Radiosonde (v1.03.02)
 
 > The in-app title now reads "Radiosonde Sounding Diagram" (it covers more
 > than just Stüve diagrams) — this repository/document keeps its original
@@ -121,6 +121,26 @@ smoothing, Theta-E, and cloud-shading threshold — back to their standard
 defaults, so every flight starts from the same known view (and, since
 transition altitude depends on the launch site, you'll be asked to confirm
 it again for each new flight).
+
+## Live polling during an active ascent
+
+The S2/RR4 ground station software writes the flight's CSV continuously
+while a sonde is airborne. After loading a CSV, the tool asks whether the
+sonde is still ascending and offers to keep polling that same file (at a
+configurable interval, 10 s by default) so the diagram keeps rebuilding
+itself as new rows are appended, without any manual re-uploading.
+
+This needs a browser with the **File System Access API** (Chrome or Edge
+on desktop) — that's what lets the page re-read the same file straight
+from disk later. In other browsers (Firefox, Safari, or mobile), the
+question still appears, but choosing "Yes" explains that live polling
+isn't available there and suggests re-clicking "Load new CSV" manually
+whenever you want to refresh.
+
+While polling is active, "Load new CSV" is replaced by a red **"⏹ Stop
+polling of CSV"** button in the same spot; clicking it stops the polling
+and leaves the diagram exactly as it last stood. Loading a different file
+or clicking "Sample data" also stops any active polling automatically.
 
 Every button and control besides loading data itself, "My flights", the
 light/dark toggle, and the keyboard-shortcuts panel stays locked (visibly
