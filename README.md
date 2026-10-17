@@ -24,6 +24,7 @@ GitHub Pages).
 - [What it does](#what-it-does)
 - [Getting started](#getting-started)
 - [Live polling during an active ascent](#live-polling-during-an-active-ascent)
+- [Follow sonde ascent (live von S2 Ground)](#follow-sonde-ascent-live-von-s2-ground)
 - [The diagram, panel by panel](#the-diagram-panel-by-panel)
 - [Flight Analytics & Analytical Comments](#flight-analytics--analytical-comments)
 - [Altitude units & Flight Level](#altitude-units--flight-level)
@@ -105,6 +106,54 @@ While polling is active, "Load new CSV" is replaced by a red **⏹ Stop polling 
 button in the same spot; clicking it stops polling and leaves the diagram exactly as it
 last stood. Loading a different file or clicking "Sample data" also stops any active
 polling automatically.
+
+## Follow sonde ascent (live von S2 Ground)
+
+Mit dem blauen Knopf **⇡ Follow sonde ascent** (neben «Sample data») verfolgt ein
+Beobachter einen laufenden Sondenaufstieg live – ohne eigene Hardware und ohne CSV. Die
+Daten kommen von der Bodenstation, die den Aufstieg in [S2 Ground](https://s2ground.wicki.aero)
+fährt; der S2-Ground-Worker streamt jedes Telemetriepaket an alle Beobachter.
+
+**So steigst Du ein**
+
+1. Die Bodenstation gibt Dir Deinen persönlichen **6-stelligen Code** (per WhatsApp-Einladung
+   oder Telefon; Alphabet ohne 0/O/1/I, Gross-/Kleinschreibung egal).
+2. «Follow sonde ascent» drücken, Code und Deinen **Klarnamen** eingeben (so erscheinst Du im
+   Chat). Beides wird auf diesem Gerät gemerkt.
+3. Die laufenden Aufstiege werden aufgelistet (Datum · Startort · Bodenstation); bei genau
+   einem ist er bereits ausgewählt. **«Folgen →»** – und das Diagramm baut sich live auf.
+   Steigst Du erst während des Aufstiegs ein, bekommst Du das ganze bisherige Profil nachgeliefert.
+
+**Was Du siehst**
+
+- Alle Panels wie gewohnt (Stüve/Emagram/Skew-T, Windfiedern, Hodograph, Steigrate, Theta-E,
+  Flugweg) – aktualisiert höchstens einmal pro Sekunde; der neueste Punkt ist im Diagramm
+  als gelber Punkt «jetzt · Höhe · Druck» markiert.
+- Kopfzeile: **LIVE · Datum Ort · Bodenstation**, «letzte Daten vor n s», Signal (dBm) und
+  Paketzahl, Anzahl verbundener Teilnehmer.
+- Rechts angedockt der **Chat mit der Bodenstation** (380 px; auf Handy/iPad als Blatt am
+  unteren Rand). Schnellantworten («Bitte jetzt auslösen», «Weiter steigen lassen»,
+  «Daten reichen») und freier Text. «Maximieren ⤢» auf dem Diagramm bzw. «—» im Chat klappt
+  den Chat zu einem schwebenden Knopf unten rechts zusammen – mit Zähler ungelesener
+  Nachrichten und Vorschau der letzten Nachricht; ein Klick dockt ihn wieder an.
+- **Folgen beenden** verlässt den Live-Modus, die Daten bleiben geladen: Save flight, Export
+  CSV, Create link und Print funktionieren mit dem verfolgten Aufstieg wie mit jeder CSV.
+
+**Was Du (bewusst) nicht kannst**
+
+Von hier aus lässt sich **nichts auslösen** – kein Cutdown, kein Befehl an Sonde oder
+Empfänger. Beobachter lesen mit und geben der Bodenstation im Chat Anweisungen oder
+Rückmeldungen; handeln tut nur die Bodenstation. Entfernt Dich die Bodenstation aus dem
+Aufstieg oder wird Dein Code widerrufen, meldet die App das («Die Bodenstation hat Dich
+entfernt» / «Code nicht mehr gültig – Bodenstation fragen») und verlässt den Live-Modus.
+
+**Fehlermeldungen:** «Code nicht gültig – Bodenstation fragen» (unbekannter Code), «Code nicht
+mehr gültig – Bodenstation fragen» (widerrufen), «S2 Ground nicht erreichbar» (kein Netz /
+Worker offline). Bei Verbindungsabbrüchen verbindet die App automatisch neu.
+
+**Für Entwickler:** `index.html?s2api=http://127.0.0.1:8787` zeigt auf einen lokalen Worker
+oder den Mock in `tests/follow-mock-server.mjs` (`node tests/follow-mock-server.mjs 8787 5`,
+Code `TEST42`); `tests/follow.test.mjs` ist der Playwright-Check des ganzen Ablaufs.
 
 ## The diagram, panel by panel
 
