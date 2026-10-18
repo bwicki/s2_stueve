@@ -5835,9 +5835,9 @@ function followEnsureDom(){
   #followDialogErr{display:none;font-size:11.5px;color:#e0554a;line-height:1.5;}
   .follow-btn-primary{background:#1f5fbf !important;border-color:#1f5fbf !important;color:#fff !important;font-weight:700 !important;}
   .follow-btn-primary:disabled{opacity:.5;cursor:not-allowed;}
-  #followChat{position:fixed;top:0;right:0;bottom:0;width:380px;background:var(--panel);border-left:1px solid var(--line);display:none;flex-direction:column;z-index:120;font-family:var(--sans);color:var(--text);}
+  #followChat{position:fixed;top:0;right:0;bottom:0;width:340px;background:var(--panel);border-left:1px solid var(--line);display:none;flex-direction:column;z-index:120;font-family:var(--sans);color:var(--text);}
   body.follow-live.follow-docked #followChat{display:flex;}
-  body.follow-live.follow-docked .app{max-width:none;margin-right:380px;}
+  body.follow-live.follow-docked .app{max-width:none;margin-right:340px;}
   .follow-chat-head{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;}
   .follow-chat-head h2{margin:0;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);font-weight:600;}
   .follow-chat-head .sub{font-size:11px;color:var(--text-dim);margin-top:3px;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -5933,7 +5933,7 @@ function followEnsureDom(){
   chat.setAttribute('aria-label', 'Chat mit Bodenstation');
   chat.innerHTML = `
     <div class="follow-chat-head">
-      <div style="min-width:0;"><h2>Chat mit Bodenstation</h2><div class="sub" id="followChatSub">Zeiten UTC</div></div>
+      <div style="min-width:0;"><h2>Chat mit Bodenstation</h2><div class="sub" id="followChatSub">Zeiten Lokalzeit</div></div>
       <div style="display:flex;align-items:center;gap:8px;flex:none;">
         <span class="follow-pill" id="followGroundPill"><span class="follow-dot" id="followGroundDot"></span><span id="followGroundTxt">Ground offline</span></span>
         <button id="followChatMin" type="button" title="Chat minimieren" aria-label="Chat minimieren">—</button>
@@ -6071,18 +6071,21 @@ async function followLoadAscents(code, name){
     }
     let ascents = null;
     if(FOLLOW.token){
-      try{ ascents = await followApi('/api/ascents?active=1'); }
+      try{ ascents = await followApi('/api/ascents'); }
       catch(e){ if(e.status === 401) FOLLOW.token = null; else throw e; }   // expired token → fresh login below
     }
     if(!FOLLOW.token){
       const r = await followApi('/api/observer/login', {method: 'POST', noAuth: true, body: JSON.stringify({code, displayName: name})});
       FOLLOW.token = r.token; FOLLOW.me = {displayName: r.displayName || name, observerId: r.observerId};
       followLsSet(FOLLOW_SS_KEY, {code, token: r.token, displayName: FOLLOW.me.displayName, observerId: r.observerId}, true);
-      ascents = await followApi('/api/ascents?active=1');
+      ascents = await followApi('/api/ascents');
     }
     followLsSet(FOLLOW_LS_KEY, {code, name});
-    FOLLOW.ascents = Array.isArray(ascents) ? ascents : [];
-    FOLLOW.selected = FOLLOW.ascents.length === 1 ? FOLLOW.ascents[0] : (FOLLOW.selected && FOLLOW.ascents.find(a => a.id === FOLLOW.selected.id)) || null;
+    // active ascents first (live), then the last few finished ones (can be loaded afterwards; owner's wish)
+    const all = Array.isArray(ascents) ? ascents : [];
+    const live = all.filter(a => a.active), done = all.filter(a => !a.active).slice(0, 8);
+    FOLLOW.ascents = live.concat(done);
+    FOLLOW.selected = live.length === 1 ? live[0] : (FOLLOW.selected && FOLLOW.ascents.find(a => a.id === FOLLOW.selected.id)) || null;
     followRenderAscentList();
     // quick replies for observers come from the Worker settings when it exposes them; otherwise the three defaults
     followApi('/api/me').then(me => {
@@ -6112,11 +6115,13 @@ function followRenderAscentList(){
   const list = document.getElementById('followAscentList');
   const a = FOLLOW.ascents || [];
   if(!a.length){ list.innerHTML = '<div>Zur Zeit läuft kein Aufstieg. Die Bodenstation startet ihn in S2 Ground – dann hier erneut «Folgen →» drücken.</div>'; return; }
+  const nLive = a.filter(x => x.active).length;
   list.innerHTML = a.map(x => { const l = followAscentLabel(x);
-    return `<div class="follow-ascent${FOLLOW.selected && FOLLOW.selected.id === x.id ? ' sel' : ''}" data-id="${followEsc(x.id)}" role="button" tabindex="0">
-      <div><div class="n">${followEsc(l.title)}</div><div class="s">${followEsc(l.sub)}</div></div>
-      <span class="follow-pill" style="border-color:#1f8a4c;"><span class="follow-dot g"></span>live</span></div>`; }).join('')
-    + (a.length > 1 ? '<div style="font-size:11px;">Mehrere Aufstiege aktiv – bitte einen wählen.</div>' : '');
+    const pill = x.active ? '<span class="follow-pill" style="border-color:#1f8a4c;"><span class="follow-dot g"></span>live</span>'
+                          : '<span class="follow-pill" style="opacity:.7;"><span class="follow-dot" style="background:#9aa7b6;"></span>beendet</span>';
+    return `<div class="follow-ascent${FOLLOW.selected && FOLLOW.selected.id === x.id ? ' sel' : ''}${x.active ? '' : ' done'}" data-id="${followEsc(x.id)}" role="button" tabindex="0">
+      <div><div class="n">${followEsc(l.title)}</div><div class="s">${followEsc(l.sub)}</div></div>${pill}</div>`; }).join('')
+    + (nLive === 0 ? '<div style="font-size:11px;">Kein Aufstieg läuft gerade – beendete Aufstiege lassen sich zum Nachsehen laden.</div>' : nLive > 1 ? '<div style="font-size:11px;">Mehrere Aufstiege aktiv – bitte einen wählen.</div>' : '');
   list.querySelectorAll('.follow-ascent').forEach(el => {
     const pick = () => { FOLLOW.selected = a.find(x => x.id === el.dataset.id) || null; followRenderAscentList(); };
     el.addEventListener('click', pick);
@@ -6130,7 +6135,7 @@ async function followDialogSubmit(){
   if(name.length < 2){ followDialogError('Bitte Deinen Klarnamen eingeben (mind. 2 Zeichen).'); return; }
   const stale = !FOLLOW.ascents || !FOLLOW.me || FOLLOW.me.displayName !== name || (followLsGet(FOLLOW_SS_KEY, true) || {}).code !== code;
   if(stale){ if(!(await followLoadAscents(code, name))) return; }
-  if(!FOLLOW.ascents.length){ followDialogError('Zur Zeit läuft kein Aufstieg.'); return; }
+  if(!FOLLOW.ascents.length){ followDialogError('Kein Aufstieg vorhanden.'); return; }
   if(!FOLLOW.selected){ followDialogError('Bitte einen Aufstieg wählen.'); return; }
   followCloseDialog();
   followStart(FOLLOW.selected);
@@ -6386,7 +6391,7 @@ function followRenderChatHead(){
   const obs = FOLLOW.presence.filter(u => u.role !== 'ground');
   document.getElementById('followGroundDot').className = 'follow-dot ' + (ground.length ? 'g' : '');
   document.getElementById('followGroundTxt').textContent = ground.length ? 'Ground online' : 'Ground offline';
-  const parts = ['Zeiten UTC'];
+  const parts = ['Zeiten Lokalzeit'];
   if(ground.length) parts.push('Ground: ' + ground.map(u => u.name).join(', '));
   if(obs.length) parts.push('Beobachter: ' + obs.map(u => u.name).join(', '));
   const sub = document.getElementById('followChatSub');
@@ -6399,7 +6404,7 @@ function followRenderChat(){
     const sys = m.role === 'system';
     const mine = followIsMine(m);
     const who = sys ? 'System' : mine ? 'Du' : m.role === 'ground' ? `Ground · ${m.user || ''}` : (m.user || 'Beobachter');
-    return `<div class="follow-msg${mine ? ' me' : ''}${sys ? ' sys' : ''}"><span class="who">${followEsc(who)} · ${followHHMM(m.t || Date.now(), true)}</span><span class="t">${followEsc(m.text)}</span></div>`;
+    return `<div class="follow-msg${mine ? ' me' : ''}${sys ? ' sys' : ''}"><span class="who">${followEsc(who)} · ${followHHMM(m.t || Date.now(), false)}</span><span class="t">${followEsc(m.text)}</span></div>`;
   }).join('') || '<div class="follow-msg sys"><span class="t">Noch keine Nachrichten – schreib der Bodenstation.</span></div>';
   box.scrollTop = box.scrollHeight;
   followRenderChatHead();
@@ -6431,7 +6436,7 @@ function followUpdateFab(){
 function followShowPreview(m){
   const p = document.getElementById('followFabPreview');
   const who = m.role === 'system' ? 'System' : m.role === 'ground' ? `Ground · ${m.user || ''}` : (m.user || 'Beobachter');
-  p.innerHTML = `<span class="who">${followEsc(who)} · ${followHHMM(m.t || Date.now(), true)}</span><br>${followEsc(m.text)}`;
+  p.innerHTML = `<span class="who">${followEsc(who)} · ${followHHMM(m.t || Date.now(), false)}</span><br>${followEsc(m.text)}`;
   p.style.display = 'block';
   clearTimeout(FOLLOW.previewTimer);
   FOLLOW.previewTimer = setTimeout(followHidePreview, 10000);

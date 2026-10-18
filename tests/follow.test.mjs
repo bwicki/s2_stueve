@@ -108,8 +108,8 @@ try {
   assert(/^LIVE · \d{4}-\d{2}-\d{2} · Rümlang · Bodenstation bwicki$/.test(live.source), 'state.source label: ' + live.source);
   assert(live.subtitle.includes('LIVE ·'), 'subtitle shows LIVE');
   assert(live.pills.some((p) => /letzte Daten vor \d+ s/.test(p)) && live.pills.some((p) => /Signal −\d+ dBm · [\d']+ Pakete/.test(p)) && live.pills.some((p) => /^1 verbunden/.test(p)), 'header pills: ' + live.pills.join(' | '));
-  assert(live.chatVisible === 'flex' && live.fabVisible === 'none' && live.appMargin === '380px', 'chat docked right, app shrunk');
-  assert(live.canvasCssW < 1380 - 380 && live.canvasCssW > 500, 'diagram scaled into remaining width: ' + live.canvasCssW);
+  assert(live.chatVisible === 'flex' && live.fabVisible === 'none' && live.appMargin === '340px', 'chat docked right, app shrunk');
+  assert(live.canvasCssW < 1380 - 340 && live.canvasCssW > 500, 'diagram scaled into remaining width: ' + live.canvasCssW);
   assert(live.stopBtn !== 'none' && live.sampleBtn === 'none', 'toolbar switched to follow mode');
   assert(live.quick.length === 3 && live.quick[0] === 'Bitte jetzt auslösen', 'default quick replies');
   assert(live.joined, 'system line "joined" in chat');
